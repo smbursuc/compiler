@@ -1,0 +1,14 @@
+integer i1;
+integer i1;
+integer a(integer x2, integer x9);
+integer b(integer a);
+integer z1(integer x);
+main
+{
+    p(10);
+    i9 <- 1;
+    i1 <- 10;
+    b(8000,90);
+    b(8000);
+    o9(2);
+}

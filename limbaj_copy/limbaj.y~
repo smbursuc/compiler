@@ -1,0 +1,157 @@
+%{
+#include <stdio.h>
+#include <string.h>
+#include "functii.h"
+extern FILE* yyin;
+extern char* yytext;
+extern int yylineno;
+void yyerror(char * s);
+int yylex();
+%}
+%union {
+int intval;
+char strval[2048];
+float floatval;
+int boolval;
+int param_nr;
+}
+%token <strval>ID <strval>TIP ASSIGN <intval>INTEGER MAIN STRUCT IF ELSE FOR WHILE AND OR LT GT LTE GTE PLUS MINUS MULT SUBT EQ NEQ <strval>STRING <boolval>BOOLEAN <floatval>FLOAT CONST FUNCTION ARRAY
+%left PLUS
+%left MINUS
+%left MULT
+%left SUBT
+%left ASSIGN
+%left AND
+%left OR
+%left LT GT EQ NEQ
+%start progr
+%%
+progr: declaratii bloc_main lista_functii {printf("\nprogram corect sintactic\n");}
+     ;
+
+declaratii :  declaratie ';'
+	   | declaratii declaratie ';'
+	   ;
+declaratie : TIP ID
+          {
+               if(!deja_declarat($1,$2))
+                    adauga_variabila($1,$2,"");
+               else printf("Variabila \"%s\" este deja declarata (linia %d)\n",$2,yylineno);
+               //adauga_variabila($1,$2,"");
+               //afiseaza_variabilele_declarate();
+          }
+           | CONST TIP ID
+           | STRUCT ID '{' declaratii '}'
+           | TIP ID '(' lista_param ')'
+           {
+
+           }
+           | TIP ID '(' ')'
+           | ARRAY LT TIP ',' INTEGER GT ID
+           ;
+lista_param : param 
+            | lista_param ','  param 
+            ;
+            
+param : TIP ID
+      ; 
+      
+conditie : ID
+         | STRING
+         | INTEGER
+         | BOOLEAN
+         | FLOAT
+         | conditie LT conditie
+         | conditie GT conditie
+         | conditie LTE conditie
+         | conditie GTE conditie
+         | conditie EQ conditie
+         | conditie NEQ conditie
+         | conditie OR conditie
+         | conditie AND conditie
+         | '(' conditie ')'
+         ;
+/* bloc */
+bloc : '{' lista_instructiuni '}'  
+     ;
+
+bloc_main : MAIN '{' lista_instructiuni '}'  
+     ;
+
+lista_functii : functie
+              | lista_functii functie
+              ;
+
+functie : FUNCTION TIP ID '(' lista_param ')' bloc;
+        |
+        ;
+
+lista_instructiuni : lista_control
+                   | lista_statement
+                   | lista_instructiuni lista_control
+                   | lista_instructiuni lista_statement
+                   ;
+/* lista instructiuni */
+lista_statement :  statement ';' 
+     | lista_statement statement ';'
+     ;
+
+/* instructiune */
+statement: ID ASSIGN ID
+         {
+              if(strcmp(ia_tip($1),ia_tip($3)))
+                   printf("Nu se poate asigna tipul \"%s\" pentru tipul \"%s\" (linia %d)\n",ia_tip($3),ia_tip($1),yylineno);
+         }
+         | ID ASSIGN INTEGER
+         {
+              if(!exista_var($1))
+              printf("Variabila \"%s\" nedeclarata (linia %d)\n",$1,yylineno);
+         }
+         | ID ASSIGN expresie
+         | ID ASSIGN FLOAT
+         | ID ASSIGN BOOLEAN
+         | ID ASSIGN '"' STRING '"' 
+         | ID '.' ID ASSIGN ID '.' ID
+         | ID '.' ID ASSIGN INTEGER
+         | ID '.' ID ASSIGN FLOAT
+         | ID '.' ID ASSIGN BOOLEAN
+         | ID '.' ID ASSIGN '"' STRING '"' 	 
+         | ID '(' lista_apel ')'
+         | ID '[' INTEGER ']' ASSIGN ID '[' INTEGER ']'
+         | ID '[' INTEGER ']' ASSIGN INTEGER
+         | ID '[' INTEGER ']' ASSIGN '"' STRING '"'
+         | ID '[' INTEGER ']' ASSIGN FLOAT
+         | ID '[' INTEGER ']' ASSIGN BOOLEAN
+         | ID '[' INTEGER ']' ASSIGN expresie
+         ;
+expresie : expresie PLUS expresie
+         | expresie MINUS expresie
+         | expresie MULT expresie
+         | expresie SUBT expresie
+         | '(' expresie ')'
+         | ID
+         | INTEGER
+         ;
+
+control : IF '(' conditie ')' '{' lista_instructiuni '}'
+        | IF '(' conditie ')' ELSE '{' lista_instructiuni '}'
+        | FOR '(' statement ';' conditie ';' statement ')' '{' lista_instructiuni '}'
+        | WHILE '(' conditie ')' '{' lista_instructiuni '}'
+        ;
+
+lista_control : control
+              | lista_control control
+              ;
+
+lista_apel : INTEGER
+           | lista_apel ',' INTEGER
+           ;
+%%
+void yyerror(char * s){
+  printf("eroare: %s la linia:%d\n",s,yylineno);
+}
+
+int main(int argc, char** argv){
+  yyin=fopen(argv[1],"r");
+  yyparse();
+} 
