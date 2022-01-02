@@ -79,9 +79,8 @@ void add_functie_argumente(char *tip, char *id)
 }
 
 void adauga_atribuire(char* id_st, char* id_dr)
-{
-    atribuiri_main[nr_curent_atribuiri_main++].id_st=id_st;
-    atribuiri_main[nr_curent_atribuiri_main++].id_dr=id_dr;
+{   strcpy(atribuiri_main[nr_curent_atribuiri_main++].id_st, id_st);
+    strcpy(atribuiri_main[nr_curent_atribuiri_main++].id_dr, id_dr);
 }
 void verifica_daca_2_functii_au_aceeasi_semnatura()
 {
