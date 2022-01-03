@@ -1,10 +1,10 @@
 integer i1;
 integer i1;
 integer i2;
-integer c1;
 integer a(integer x2, integer x9);
 integer b(integer a);
 integer z1(integer x);
+integer c(integer d);
 main
 {
     p(10);
@@ -13,4 +13,11 @@ main
     b(8000,90);
     b(8000);
     o9(2);
+}
+integer c(integer d)
+{
+    integer e;
+    e3 <- 5;
+    integer e5;
+    o8(3);
 }
