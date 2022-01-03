@@ -23,6 +23,15 @@ struct variabila
     char localglobal[30];
 };
 
+
+struct structura
+{
+    char id[30];
+    struct variabila variabile_declarate_in_struct[100];
+    int nr_variabile_declarate_struct;
+};
+
+
 struct functie
 {
     char tip[30];
@@ -50,6 +59,7 @@ struct variabila variabile_functii[maxVarNR];
 struct functie functii[maxVarNR];
 struct functie functii_in_main[maxVarNR];
 struct functie functii_definite[maxVarNR];
+struct structura structuri[maxVarNR];
 
 int nr_curent_var = 0;
 int nr_curent_var_main = 0;
@@ -58,7 +68,12 @@ int nr_curent_functii = 0;
 int nr_curent_functii_main = 0;
 int nr_curent_functii_definite = 0;
 int nr_curent_atribuiri_main = 0;
+int nr_curent_structuri = 0;
 int param_nr = 0;
+
+const char* globalvariable_format = "(%s, %s, %s)\n";
+const char* localvariable_format = "(%s, %s, %s, %s)\n";
+const char* function_format = "(%s, %s, %s)\n";
 
 char buffer[100];
 char buf[30];
@@ -114,6 +129,7 @@ void add_variabila_functie_definita(char *qualifier, char *tip, char *id, char *
     functii_definite[nr_curent_functii_definite].variabile_declarate[functii_definite[nr_curent_functii_definite].nr_variabile_declarate].linie = linie;
     strcpy(functii_definite[nr_curent_functii_definite].variabile_declarate[functii_definite[nr_curent_functii_definite].nr_variabile_declarate].localglobal, localglobal);
 }
+
 /*void add_declaratii_functie_definita(char* qualifier, char* tip, char* id, int linie)
 {
     char declaratie[100];
@@ -200,7 +216,18 @@ void adauga_variabila(char *identifier, char *tip, char *id, char *valoare, int 
     variabile[nr_curent_var].linie = linie;
     nr_curent_var++;
 }
+void adauga_variabile_struct(char *tip, char*id, char *valoare, int linie)
+{  
+    strcpy(structuri[nr_curent_structuri].variabile_declarate_in_struct[structuri[nr_curent_structuri].nr_variabile_declarate_struct].valoare,valoare);
+    strcpy(structuri[nr_curent_structuri].variabile_declarate_in_struct[structuri[nr_curent_structuri].nr_variabile_declarate_struct].tip,tip);
+    strcpy(structuri[nr_curent_structuri].variabile_declarate_in_struct[structuri[nr_curent_structuri].nr_variabile_declarate_struct].id,id);
+    structuri[nr_curent_structuri].nr_variabile_declarate_struct++;
+}
 
+void adauga_struct(char* id)
+{
+    strcpy(structuri[nr_curent_structuri-1].id,id);
+}
 void adauga_variabile_main(char *id, int linie)
 {
     strcpy(variabile_main[nr_curent_var_main].id, id);
@@ -214,6 +241,7 @@ void adauga_variabile_functii(char *id, int linie)
     variabile_main[nr_curent_var_functii].linie = linie;
     nr_curent_var_functii++;
 }
+
 void afiseaza_variabilele_declarate()
 {
     for (int i = 0; i < nr_curent_var; i++)
@@ -369,6 +397,39 @@ void check_errors()
 }
 void symbol_table()
 {
+    FILE* file;
+    file=fopen("symbol_table.txt","w+");
+    for (int i = 0; i < nr_curent_var; i++)
+        fprintf(file,globalvariable_format,variabile[i].id,variabile[i].tip,variabile[i].localglobal);
+    fprintf(file,"\n");
+    for (int i = 0; i < nr_curent_functii_definite; i++)
+    {
+        for (int j = 0; j < functii_definite[i].nr_variabile_declarate; j++)
+        {
+            fprintf(file,localvariable_format, functii_definite[i].variabile_declarate[j].id, functii_definite[i].variabile_declarate[j].tip, functii_definite[i].variabile_declarate[j].localglobal, functii_definite[i].id);
+        }
+    }
+fprintf(file,"\n");
+    for (int i = 0; i < nr_curent_functii; i++)
+    {
+        fprintf(file,"(%s %s,", functii[i].id, functii[i].tip);
+        for (int j = 0; j < functii[i].nr_argumente; j++)
+        {
+            fprintf(file," %s %s", functii[i].argumente_functie[j].tip, functii[i].argumente_functie[j].id);
+        }
+        fprintf(file,")");
+        fprintf(file,"\n");
+    }
+    fprintf(file,"\n");
+
+    for (int i=0; i < nr_curent_structuri; i++)
+        {   fprintf(file,"(");
+            fprintf(file,"%s struct,", structuri[i].id);
+            for(int j=0; j < structuri[i].nr_variabile_declarate_struct; j++)
+                fprintf(file," %s %s", structuri[i].variabile_declarate_in_struct[j].tip,structuri[i].variabile_declarate_in_struct[j].id);
+        fprintf(file,")");
+        fprintf(file,"\n");
+        }
 }
 
 void print_variabile_din_functii_definite()
@@ -394,6 +455,7 @@ void print_functii_definite()
     {
         printf("%s %s\n", functii_definite[i].id, functii_definite[i].tip);
     }
+
 }
 void print_info()
 {
@@ -403,4 +465,5 @@ void print_info()
     print_functii_main();
     print_functii_definite();
     print_variabile_din_functii_definite();
+    symbol_table();
 }
