@@ -25,21 +25,39 @@ int boolval;
 %left LT GT EQ NEQ
 %start progr
 %%
-progr: declaratii bloc_main lista_functii {printf("\nprogram corect sintactic\n"); print_info(); check_errors();}
+progr: declaratii_inainte_de_main bloc_main lista_functii {printf("\nprogram corect sintactic\n"); print_info(); check_errors();}
      ;
 
-declaratii :  declaratie ';'
-	   | declaratii declaratie ';'
+declaratii_inainte_de_main :  declaratie ';'
+	   | declaratii_inainte_de_main declaratie ';'
+
+
+declaratii_in_functie : TIP ID ';' 
+          {
+               adauga_variabila("public",$1,$2,"",yylineno,"local");
+          }
+           | CONST TIP ID ';' 
+           {
+                adauga_variabila("const",$2,$3,"",yylineno, "local");
+           }
+           | STRUCT ID '{' declaratii_in_functie '}' ';' 
+           | TIP ID '(' lista_param ')' ';' 
+           {
+               nr_curent_functii++;
+               add_functie($1,$2,yylineno);
+           }
+           | TIP ID '(' ')' ';' 
+           | ARRAY LT TIP ',' INTEGER GT ID ';' 
 	   ;
 declaratie : TIP ID
           {
-               adauga_variabila("public",$1,$2,"",yylineno);
+               adauga_variabila("public",$1,$2,"",yylineno,"global");
           }
            | CONST TIP ID
            {
-                adauga_variabila("const",$2,$3,"",yylineno);
+                adauga_variabila("const",$2,$3,"",yylineno, "global");
            }
-           | STRUCT ID '{' declaratii '}'
+           | STRUCT ID '{' declaratii_inainte_de_main '}'
            | TIP ID '(' lista_param ')'
            {
                nr_curent_functii++;
@@ -77,36 +95,30 @@ conditie : ID
          | conditie AND conditie
          | '(' conditie ')'
          ;
-/* bloc */
-bloc : '{' lista_instructiuni '}'  
-     ;
 
 bloc_main : MAIN '{' lista_instructiuni '}'  
      ;
 
-lista_functii : functie
-              | lista_functii functie
+lista_functii : functie 
+              | lista_functii functie 
               ;
-
-functie : FUNCTION TIP ID '(' lista_param ')' bloc
-        {
-
-        }
+functie : TIP ID '(' lista_param ')' bloc_functie
         | %empty;
         ;
-
+bloc_functie : '{' lista_instructiuni '}'  
+             ;
 lista_instructiuni : lista_control
                    | lista_statement
-                   | declaratii
+                   | declaratii_in_functie
                    | lista_instructiuni lista_control
                    | lista_instructiuni lista_statement
-                   | lista_instructiuni declaratii
+                   | lista_instructiuni declaratii_in_functie
+                   ;
                    ;
 /* lista instructiuni */
 lista_statement :  statement ';' 
      | lista_statement statement ';'
      ;
-
 /* instructiune */
 statement: ID ASSIGN ID
          {
