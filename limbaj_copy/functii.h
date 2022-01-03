@@ -20,6 +20,7 @@ struct variabila
     int linie;
     char valoare[30];
     char identifier[30];
+    char localglobal[30];
 };
 
 struct functie
@@ -40,12 +41,14 @@ struct atribuire
 struct atribuire atribuiri_main[maxVarNR];
 struct variabila variabile[maxVarNR];
 struct variabila variabile_main[maxVarNR];
+struct variabila variabile_functii[maxVarNR];
 
 struct functie functii[maxVarNR];
 struct functie functii_in_main[maxVarNR];
 
 int nr_curent_var = 0;
 int nr_curent_var_main = 0;
+int nr_curent_var_functii = 0;
 int nr_curent_functii = 0;
 int nr_curent_functii_main = 0;
 int nr_curent_instructiuni = 0;
@@ -148,12 +151,13 @@ void verifica_daca_2_variabile_sunt_declarate_la_fel()
     }
 }
 
-void adauga_variabila(char *identifier, char *tip, char *id, char *valoare, int linie)
+void adauga_variabila(char *identifier, char *tip, char *id, char *valoare, int linie, char *localglobal)
 {
     strcpy(variabile[nr_curent_var].id, id);
     strcpy(variabile[nr_curent_var].valoare, valoare);
     strcpy(variabile[nr_curent_var].tip, tip);
     strcpy(variabile[nr_curent_var].identifier, identifier);
+    strcpy(variabile[nr_curent_var].localglobal, localglobal);
     variabile[nr_curent_var].linie = linie;
     nr_curent_var++;
 }
@@ -163,6 +167,13 @@ void adauga_variabile_main(char *id, int linie)
     strcpy(variabile_main[nr_curent_var_main].id, id);
     variabile_main[nr_curent_var_main].linie = linie;
     nr_curent_var_main++;
+}
+
+void adauga_variabile_functii(char *id, int linie)
+{
+    strcpy(variabile_functii[nr_curent_var_functii].id, id);
+    variabile_main[nr_curent_var_functii].linie = linie;
+    nr_curent_var_functii++;
 }
 void afiseaza_variabilele_declarate()
 {
@@ -318,7 +329,10 @@ void check_errors()
     verifica_daca_2_functii_au_aceeasi_semnatura();
     verifica_ca_asignarile_sa_fie_corecte();
 }
-
+void symbol_table()
+{
+    
+}
 void print_info()
 {
     afiseaza_variabilele_declarate();
