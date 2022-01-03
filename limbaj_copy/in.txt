@@ -1,13 +1,11 @@
 integer i1;
 integer i1;
-integer i2;
 integer a(integer x2, integer x9);
 integer b(integer a);
-integer z1(integer x);
-integer c(integer d);
+structure g{integer k; integer u;};
+structure t{integer w;};
 main
-{
-    p(10);
+{   p(10);
     i9 <- 1;
     i1 <- 10;
     b(8000,90);
