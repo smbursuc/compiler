@@ -14,7 +14,7 @@ main
     b(8000);
     o9(2);
 }
-integer c(integer d)
+function integer c(integer d)
 {
     integer e;
     e3 <- 5;

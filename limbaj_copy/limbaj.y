@@ -34,18 +34,19 @@ declaratii_inainte_de_main :  declaratie ';'
 
 declaratii_in_functie : TIP ID ';' 
           {
-               adauga_variabila("public",$1,$2,"",yylineno,"local");
+               add_variabila_functie_definita("public",$1,$2,"",yylineno,"local");
+               functii_definite[nr_curent_functii_definite].nr_variabile_declarate++;
           }
            | CONST TIP ID ';' 
            {
-                adauga_variabila("const",$2,$3,"",yylineno, "local");
+                add_variabila_functie_definita("const",$2,$3,"",yylineno, "local");
            }
            | STRUCT ID '{' declaratii_in_functie '}' ';' 
-           | TIP ID '(' lista_param ')' ';' 
+           /*| TIP ID '(' lista_param ')' ';' 
            {
                nr_curent_functii++;
                add_functie($1,$2,yylineno);
-           }
+           }*/
            | TIP ID '(' ')' ';' 
            | ARRAY LT TIP ',' INTEGER GT ID ';' 
 	   ;
@@ -72,14 +73,23 @@ lista_param : param
             }     
             | lista_param ','  param
             ;
-            
+
+lista_param_functii_definite : param_fd
+                             | lista_param_functii_definite ',' param_fd
+                             ;
 param : TIP ID
       {     
           add_functie_argumente($1,$2);
           functii[nr_curent_functii].nr_argumente++;
       }
       ; 
-      
+
+param_fd : TIP ID 
+     {
+          add_parametru_functie_definita($1,$2);
+          functii_definite[nr_curent_functii_definite].nr_argumente++;
+     }
+     ;
 conditie : ID
          | STRING
          | INTEGER
@@ -102,7 +112,11 @@ bloc_main : MAIN '{' lista_instructiuni '}'
 lista_functii : functie 
               | lista_functii functie 
               ;
-functie : TIP ID '(' lista_param ')' bloc_functie
+functie : FUNCTION TIP ID '(' lista_param_functii_definite ')' bloc_functie
+        {
+             add_functie_definite($2,$3,yylineno);
+             nr_curent_functii_definite++;
+        }
         | %empty;
         ;
 bloc_functie : '{' lista_instructiuni '}'  
