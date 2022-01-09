@@ -4,6 +4,7 @@
 #include <ctype.h>
 #include <stdarg.h>
 #include <math.h>
+#include <stdbool.h>
 #define maxVarNR 1024
 #define maxParametriFunctie 20
 union tipuri_variabile
@@ -30,7 +31,18 @@ struct structura
     struct variabila variabile_declarate_in_struct[100];
     int nr_variabile_declarate_struct;
 };
-
+struct array
+{   
+    char id[30];
+    char tip[30];
+    char dimensiune[30];
+    struct variabila *elemente;
+    int nr_curent_elemente_array;
+};
+struct element_array
+{
+    char valoare[30];
+};
 struct functie
 {
     char tip[30];
@@ -59,6 +71,7 @@ struct functie functii[maxVarNR];
 struct functie functii_in_main[maxVarNR];
 struct functie functii_definite[maxVarNR];
 struct structura structuri[maxVarNR];
+struct array arrays[maxVarNR];
 
 int nr_curent_var = 0;
 int nr_curent_var_main = 0;
@@ -68,6 +81,7 @@ int nr_curent_functii_main = 0;
 int nr_curent_functii_definite = 0;
 int nr_curent_atribuiri_main = 0;
 int nr_curent_structuri = 0;
+int nr_curent_arrays = 0;
 int param_nr = 0;
 
 const char *globalvariable_format = "(%s, %s, %s, %s)\n";
@@ -289,13 +303,13 @@ void adauga_struct(char *id)
 {
     strcpy(structuri[nr_curent_structuri - 1].id, id);
 }
+
 void adauga_variabile_main(char *id, int linie)
 {
     strcpy(variabile_main[nr_curent_var_main].id, id);
     variabile_main[nr_curent_var_main].linie = linie;
     nr_curent_var_main++;
 }
-
 void adauga_variabile_functii(char *id, int linie)
 {
     strcpy(variabile_functii[nr_curent_var_functii].id, id);
@@ -365,7 +379,18 @@ char *ia_tip(char *id)
     }
     return "";
 }
-
+char *ia_tip_struct(char *id_struct, char* id_var)
+{
+    for(int i=0;i<nr_curent_structuri;i++)
+        {
+            if(strcmp(structuri[i].id,id_struct)==0)
+                for (int j = 0; j < structuri[i].nr_variabile_declarate_struct; j++)
+                    if(strcmp(structuri[i].variabile_declarate_in_struct[j].id,id_var)==0)
+                        {
+                            return structuri[i].variabile_declarate_in_struct[j].tip;
+                        }
+}
+}
 void print_functii()
 {
     for (int i = 0; i < nr_curent_functii; i++)
@@ -499,10 +524,39 @@ void symbol_table()
         fprintf(file, "(");
         fprintf(file, "%s struct,", structuri[i].id);
         for (int j = 0; j < structuri[i].nr_variabile_declarate_struct; j++)
-            fprintf(file, " %s %s", structuri[i].variabile_declarate_in_struct[j].tip, structuri[i].variabile_declarate_in_struct[j].id);
+            fprintf(file, " %s %s %s", structuri[i].variabile_declarate_in_struct[j].tip, structuri[i].variabile_declarate_in_struct[j].id, structuri[i].variabile_declarate_in_struct[j].valoare);
         fprintf(file, ")");
         fprintf(file, "\n");
     }
+
+    for (int i = 0; i < nr_curent_arrays; i++)
+    {
+        fprintf(file, "(%s array, %s, %p)\n", arrays[i].id,arrays[i].tip, arrays[i].elemente);
+    }
+
+
+
+}
+
+void adauga_array(char *tip,char*dimensiune, char*id)
+{   strcpy(arrays[nr_curent_arrays].tip,tip);
+    strcpy(arrays[nr_curent_arrays].id,id);
+    strcpy(arrays[nr_curent_arrays].dimensiune,dimensiune);
+    if(strcmp(tip,"integer")==0)
+        arrays[nr_curent_arrays].elemente = (struct variabila*)malloc(sizeof(int)*atoi(dimensiune));
+    if(strcmp(tip,"string")==0)
+        arrays[nr_curent_arrays].elemente = (struct variabila*)malloc(sizeof(char)*atoi(dimensiune));
+    if(strcmp(tip,"boolean")==0)
+        arrays[nr_curent_arrays].elemente = (struct variabila*)malloc(sizeof(bool)*atoi(dimensiune));
+    if(strcmp(tip,"float")==0)
+        arrays[nr_curent_arrays].elemente = (struct variabila*)malloc(sizeof(float)*atoi(dimensiune));
+    printf("%p",arrays[nr_curent_arrays].elemente);
+    nr_curent_arrays++;
+}
+
+void update_element_array(char *id_array, char *tip, char *valoare)
+{
+    exit(0);
 }
 
 void update_valoare(char* id,char* valoare)
@@ -517,6 +571,21 @@ void update_valoare(char* id,char* valoare)
     }
 }
 
+void update_valoare_struct(char *id_struct,char *id_variabila, char* valoare)
+{
+    for(int i=0;i<nr_curent_structuri;i++)
+        {
+            if(strcmp(structuri[i].id,id_struct)==0)
+                for (int j = 0; j < structuri[i].nr_variabile_declarate_struct; j++)
+                    if(strcmp(structuri[i].variabile_declarate_in_struct[j].id,id_variabila)==0)
+                        {
+                            strcpy(structuri[i].variabile_declarate_in_struct[j].valoare, valoare);
+                            break;
+                        }
+
+        }
+}
+
 char* get_value(char* id)
 {
     for(int i=0;i<nr_curent_var;i++)
@@ -527,6 +596,17 @@ char* get_value(char* id)
         }
     }
     return NULL;
+}
+char* get_value_struct(char* id_struct, char* id_var)
+{
+    for(int i=0;i<nr_curent_structuri;i++)
+        {
+            if(strcmp(structuri[i].id,id_struct)==0)
+                for (int j = 0; j < structuri[i].nr_variabile_declarate_struct; j++)
+                    if(strcmp(structuri[i].variabile_declarate_in_struct[j].id,id_var)==0)
+                        return structuri[i].variabile_declarate_in_struct[j].valoare;
+
+        }
 }
 
 void print_variabile_din_functii_definite()
