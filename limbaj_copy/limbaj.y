@@ -16,7 +16,7 @@ float floatval;
 int boolval;
 struct nod* root;
 }
-%token <strval>ID <strval>TIP ASSIGN <strval>INTEGER MAIN STRUCT IF ELSE FOR WHILE AND OR LT GT LTE GTE PLUS MINUS MULT SUBT EQ NEQ <strval>STRING <boolval>BOOLEAN <floatval>FLOAT CONST <strval>FUNCTION ARRAY PRINT
+%token <strval>ID <strval>TIP ASSIGN <strval>INTEGER MAIN STRUCT IF ELSE FOR WHILE AND OR LT GT LTE GTE PLUS MINUS MULT SUBT EQ NEQ <strval>STRING <strval>BOOLEAN <strval>FLOAT CONST <strval>FUNCTION ARRAY PRINT
 %left PLUS MINUS 
 %left '^'
 %left MULT SUBT
@@ -47,6 +47,9 @@ declaratie :  STRUCT ID '{' declaratii_struct '}'    { nr_curent_structuri++; ad
            }
            | TIP ID '(' ')' 
            | ARRAY LT TIP ',' INTEGER GT ID 
+           {
+                adauga_array($3,$5,$7);
+           }
            ;
 declaratii_struct:  declaratie_struct ';'
 	   | declaratii_struct declaratie_struct ';'
@@ -178,7 +181,14 @@ statement: ID ASSIGN ID
          | ID ASSIGN INTEGER
          {
               adauga_variabile_main($1,yylineno);
-              update_valoare($1,$3);
+              if(strcmp(ia_tip($1),"integer") == 0)
+                    update_valoare($1,$3);
+               else
+              {
+                   char buf[500];
+                   sprintf(buf,"\"%s\" nu are tipul integer (linia %d)\n",$1,yylineno);
+                   adauga_eroare(buf,yylineno);
+              }
          }
          | ID ASSIGN expresie
          {
@@ -187,13 +197,111 @@ statement: ID ASSIGN ID
               update_valoare($1,buf);
          }
          | ID ASSIGN FLOAT
+
+         {    adauga_variabile_main($1,yylineno);
+              if(strcmp(ia_tip($1),"float") == 0)
+                    update_valoare($1,$3);
+               else
+              {
+                   char buf[500];
+                   sprintf(buf,"\"%s\" nu are tipul float (linia %d)\n",$1,yylineno);
+                   adauga_eroare(buf,yylineno);
+              }
+               
+         }
          | ID ASSIGN BOOLEAN
-         | ID ASSIGN '"' STRING '"' 
+         {    
+              adauga_variabile_main($1,yylineno);
+              if(strcmp(ia_tip($1),"boolean") == 0)
+                    update_valoare($1,$3);
+               else
+              {
+                   char buf[500];
+                   sprintf(buf,"\"%s\" nu are tipul boolean (linia %d)\n",$1,yylineno);
+                   adauga_eroare(buf,yylineno);
+              }
+               
+         }
+         | ID ASSIGN '"' STRING '"'
+         {
+              adauga_variabile_main($1,yylineno);
+              if(strcmp(ia_tip($1),"string") == 0)
+                    update_valoare($1,$4);
+               else
+              {
+                   char buf[500];
+                   sprintf(buf,"\"%s\" nu are tipul string (linia %d)\n",$1,yylineno);
+                   adauga_eroare(buf,yylineno);
+              }
+         }
          | ID '.' ID ASSIGN ID '.' ID
+         {    
+              adauga_variabile_main($1,yylineno);
+              if(strcmp(ia_tip_struct($1,$3),ia_tip_struct($5,$7)) == 0)
+                    update_valoare_struct($1,$3,$7);
+               else
+              {
+                   char buf[500];
+                   sprintf(buf,"\"%s\" nu are acelasi tip ca \"%s\" (linia %d)\n",$3,$7,yylineno);
+                   adauga_eroare(buf,yylineno);
+              }
+         }
          | ID '.' ID ASSIGN INTEGER
+
+         {
+              adauga_variabile_main($1,yylineno);
+              if(strcmp(ia_tip_struct($1,$3),"integer") == 0)
+                    update_valoare_struct($1,$3,$5);
+               else
+              {
+                   char buf[500];
+                   sprintf(buf,"\"%s.%s\" nu are tipul integer (linia %d)\n",$1,$3,yylineno);
+                   adauga_eroare(buf,yylineno);
+              }
+         }
          | ID '.' ID ASSIGN FLOAT
+
+         {
+              adauga_variabile_main($1,yylineno);
+              if(strcmp(ia_tip_struct($1,$3),"float") == 0)
+                    update_valoare_struct($1,$3,$5);
+               else
+              {
+                   char buf[500];
+                   sprintf(buf,"\"%s.%s\" nu are tipul float (linia %d)\n",$1,$3,yylineno);
+                   adauga_eroare(buf,yylineno);
+              }
+         }
          | ID '.' ID ASSIGN BOOLEAN
-         | ID '.' ID ASSIGN '"' STRING '"' 	 
+         {
+               adauga_variabile_main($1,yylineno);
+              if(strcmp(ia_tip_struct($1,$3),"boolean") == 0)
+                    update_valoare_struct($1,$3,$5);
+               else
+              {
+                   char buf[500];
+                   sprintf(buf,"\"%s.%s\" nu are tipul boolean (linia %d)\n",$1,$3,yylineno);
+                   adauga_eroare(buf,yylineno);
+              }   
+         }
+         | ID '.' ID ASSIGN '"' STRING '"'
+         {
+              adauga_variabile_main($1,yylineno);
+              if(strcmp(ia_tip_struct($1,$3),"string") == 0)
+                    update_valoare_struct($1,$3,$6);
+               else
+              {
+                   char buf[500];
+                   sprintf(buf,"\"%s.%s\" nu are tipul string (linia %d)\n",$1,$3,yylineno);
+                   adauga_eroare(buf,yylineno);
+              }
+         }
+         | ID '.' ID ASSIGN expresie
+         {
+              char buf[30];
+              sprintf(buf,"%d",evalAST($5));
+              update_valoare_struct($1,$3,buf);
+         }
          | ID '[' INTEGER ']' ASSIGN ID '[' INTEGER ']'
          | ID '[' INTEGER ']' ASSIGN INTEGER
          | ID '[' INTEGER ']' ASSIGN '"' STRING '"'
@@ -251,9 +359,17 @@ expresie : '(' expresie ')' '^' expresie
          {
               $$=buildAST("+",$1,$3,operator);
          }
-         | ID
+         | ID '.' ID
          {
-              $$=buildAST(get_value($1),NULL,NULL,id);
+              char* s = (char*)malloc(sizeof(char)*(10));
+               sprintf(s,"%s",get_value_struct($1,$3));
+               $$=buildAST(s,NULL,NULL,numar);
+         }
+         | ID
+         {     char* s = (char*)malloc(sizeof(char)*(10));
+               sprintf(s,"%s",get_value($1));
+               $$=buildAST(s,NULL,NULL,numar);
+
          }
          | INTEGER
          {
