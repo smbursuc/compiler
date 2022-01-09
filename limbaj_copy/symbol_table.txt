@@ -1,0 +1,11 @@
+(i1, integer, global, )
+(i1, integer, global, )
+
+(e, integer, local, c)
+(e5, integer, local, c)
+
+(a integer, integer x2 integer x9)
+(b integer, integer a)
+
+(g struct, integer k integer u)
+(t struct, integer w)

@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.5.1.  */
+/* A Bison parser, made by GNU Bison 3.8.2.  */
 
 /* Bison interface for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2020 Free Software Foundation,
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2021 Free Software Foundation,
    Inc.
 
    This program is free software: you can redistribute it and/or modify
@@ -16,7 +16,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
@@ -31,8 +31,9 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-/* Undocumented macros, especially those whose name start with YY_,
-   are private implementation details.  Do not rely on them.  */
+/* DO NOT RELY ON FEATURES THAT ARE NOT DOCUMENTED in the manual,
+   especially those whose name start with YY_ or yy_.  They are
+   private implementation details that can be changed or removed.  */
 
 #ifndef YY_YY_LIMBAJ_TAB_H_INCLUDED
 # define YY_YY_LIMBAJ_TAB_H_INCLUDED
@@ -44,54 +45,61 @@
 extern int yydebug;
 #endif
 
-/* Token type.  */
+/* Token kinds.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
   enum yytokentype
   {
-    ID = 258,
-    TIP = 259,
-    ASSIGN = 260,
-    INTEGER = 261,
-    MAIN = 262,
-    STRUCT = 263,
-    IF = 264,
-    ELSE = 265,
-    FOR = 266,
-    WHILE = 267,
-    AND = 268,
-    OR = 269,
-    LT = 270,
-    GT = 271,
-    LTE = 272,
-    GTE = 273,
-    PLUS = 274,
-    MINUS = 275,
-    MULT = 276,
-    SUBT = 277,
-    EQ = 278,
-    NEQ = 279,
-    STRING = 280,
-    BOOLEAN = 281,
-    FLOAT = 282,
-    CONST = 283,
-    FUNCTION = 284,
-    ARRAY = 285
+    YYEMPTY = -2,
+    YYEOF = 0,                     /* "end of file"  */
+    YYerror = 256,                 /* error  */
+    YYUNDEF = 257,                 /* "invalid token"  */
+    ID = 258,                      /* ID  */
+    TIP = 259,                     /* TIP  */
+    ASSIGN = 260,                  /* ASSIGN  */
+    INTEGER = 261,                 /* INTEGER  */
+    MAIN = 262,                    /* MAIN  */
+    STRUCT = 263,                  /* STRUCT  */
+    IF = 264,                      /* IF  */
+    ELSE = 265,                    /* ELSE  */
+    FOR = 266,                     /* FOR  */
+    WHILE = 267,                   /* WHILE  */
+    AND = 268,                     /* AND  */
+    OR = 269,                      /* OR  */
+    LT = 270,                      /* LT  */
+    GT = 271,                      /* GT  */
+    LTE = 272,                     /* LTE  */
+    GTE = 273,                     /* GTE  */
+    PLUS = 274,                    /* PLUS  */
+    MINUS = 275,                   /* MINUS  */
+    MULT = 276,                    /* MULT  */
+    SUBT = 277,                    /* SUBT  */
+    EQ = 278,                      /* EQ  */
+    NEQ = 279,                     /* NEQ  */
+    STRING = 280,                  /* STRING  */
+    BOOLEAN = 281,                 /* BOOLEAN  */
+    FLOAT = 282,                   /* FLOAT  */
+    CONST = 283,                   /* CONST  */
+    FUNCTION = 284,                /* FUNCTION  */
+    ARRAY = 285,                   /* ARRAY  */
+    PRINT = 286                    /* PRINT  */
   };
+  typedef enum yytokentype yytoken_kind_t;
 #endif
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 11 "limbaj.y"
+#line 12 "limbaj.y"
 
 int intval;
-char strval[2048];
+char strval[50];
 float floatval;
 int boolval;
+struct nod* root;
 
-#line 95 "limbaj.tab.h"
+#line 103 "limbaj.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -102,6 +110,8 @@ typedef union YYSTYPE YYSTYPE;
 
 extern YYSTYPE yylval;
 
+
 int yyparse (void);
+
 
 #endif /* !YY_YY_LIMBAJ_TAB_H_INCLUDED  */

@@ -1,6 +1,7 @@
 %{
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 #include "functii.h"
 extern FILE* yyin;
 extern char* yytext;
@@ -10,20 +11,17 @@ int yylex();
 %}
 %union {
 int intval;
-char strval[2048];
+char strval[50];
 float floatval;
 int boolval;
+struct nod* root;
 }
-%token <strval>ID <strval>TIP ASSIGN <strval>INTEGER MAIN STRUCT IF ELSE FOR WHILE AND OR LT GT LTE GTE PLUS MINUS MULT SUBT EQ NEQ <strval>STRING <boolval>BOOLEAN <floatval>FLOAT CONST <strval>FUNCTION ARRAY
-%left PLUS
-%left MINUS
-%left MULT
-%left SUBT
-%left ASSIGN
-%left AND
-%left OR
-%left LT GT EQ NEQ
+%token <strval>ID <strval>TIP ASSIGN <strval>INTEGER MAIN STRUCT IF ELSE FOR WHILE AND OR LT GT LTE GTE PLUS MINUS MULT SUBT EQ NEQ <strval>STRING <boolval>BOOLEAN <floatval>FLOAT CONST <strval>FUNCTION ARRAY PRINT
+%left PLUS MINUS 
+%left '^'
+%left MULT SUBT
 %start progr
+%type <root>expresie
 %%
 progr: declaratii bloc_main lista_functii {printf("\nprogram corect sintactic\n"); print_info(); check_errors();}
      ;
@@ -167,15 +165,26 @@ lista_statement :  statement ';'
 /* instructiune */
 statement: ID ASSIGN ID
          {
+              if(strcmp(ia_tip($1),ia_tip($3)) == 0)
+              update_valoare($1,get_value($3));
+              else
+              {
+                   char buf[500];
+                   sprintf(buf,"\"%s\" nu are acelasi tip ca \"%s\" (linia %d)\n",$1,$3,yylineno);
+                   adauga_eroare(buf,yylineno);
+              }
               
          }
          | ID ASSIGN INTEGER
          {
               adauga_variabile_main($1,yylineno);
+              update_valoare($1,$3);
          }
          | ID ASSIGN expresie
          {
-              
+              char buf[30];
+              sprintf(buf,"%d",evalAST($3));
+              update_valoare($1,buf);
          }
          | ID ASSIGN FLOAT
          | ID ASSIGN BOOLEAN
@@ -196,14 +205,62 @@ statement: ID ASSIGN ID
               nr_curent_functii_main++;
               add_functie_main($1,yylineno);
          }
+         | PRINT '(' expresie ')'
+         {
+              printf("%d\n",evalAST($3));
+         }
          ;
-expresie : expresie PLUS expresie
-         | expresie MINUS expresie
+expresie : '(' expresie ')' '^' expresie
+         {
+              $$=buildAST("^",$2,$5,operator);
+         }
+         | expresie '^' expresie
+         {
+              $$=buildAST("^",$1,$3,operator);
+         }
+         | '(' expresie PLUS expresie ')'
+         {
+              $$=buildAST("+",$2,$4,operator);
+         }
+         | '(' expresie MINUS expresie ')'
+         {
+              $$=buildAST("-",$2,$4,operator);
+         }
+         | '(' expresie MULT expresie ')'
+         {
+              $$=buildAST("*",$2,$4,operator);
+         }
+         | '(' expresie SUBT expresie ')'
+         {
+              $$=buildAST("/",$2,$4,operator);
+         }
          | expresie MULT expresie
+         {
+              $$=buildAST("*",$1,$3,operator);
+         }
          | expresie SUBT expresie
-         | '(' expresie ')'
+         {
+              $$=buildAST("/",$1,$3,operator);
+         }
+         | expresie MINUS expresie
+         {
+              $$=buildAST("-",$1,$3,operator);
+              //printf("Arg: %s %s %s\n",$1->valoare,"-",$3->valoare);
+         }
+         | expresie PLUS expresie
+         {
+              $$=buildAST("+",$1,$3,operator);
+         }
          | ID
+         {
+              $$=buildAST(get_value($1),NULL,NULL,id);
+         }
          | INTEGER
+         {
+               char* s = (char*)malloc(sizeof(char)*(10));
+               sprintf(s,"%s",$1);
+               $$=buildAST(s,NULL,NULL,numar);
+         }
          ;
 
 control : IF '(' conditie ')' '{' lista_instructiuni '}'

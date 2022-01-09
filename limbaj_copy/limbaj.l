@@ -5,6 +5,7 @@
 %option noyywrap
 %%
 "integer"|"float"|"string"|"boolean" {strcpy(yylval.strval, yytext); return TIP;}
+"print" {return PRINT;}
 "function" {return FUNCTION;}
 "array" {return ARRAY;}
 "structure" {return STRUCT;}

@@ -1,20 +1,26 @@
 State 15 conflicts: 1 shift/reduce
 State 24 conflicts: 1 shift/reduce, 1 reduce/reduce
-State 37 conflicts: 1 shift/reduce
-State 40 conflicts: 3 shift/reduce
-State 56 conflicts: 1 shift/reduce
-State 57 conflicts: 3 shift/reduce
-State 64 conflicts: 2 reduce/reduce
-State 65 conflicts: 2 reduce/reduce
-State 126 conflicts: 2 shift/reduce
-State 127 conflicts: 2 shift/reduce
-State 128 conflicts: 2 shift/reduce
-State 129 conflicts: 2 shift/reduce
-State 130 conflicts: 8 shift/reduce
-State 131 conflicts: 8 shift/reduce
-State 132 conflicts: 2 shift/reduce
-State 133 conflicts: 2 shift/reduce
-State 142 conflicts: 2 reduce/reduce
+State 41 conflicts: 4 shift/reduce
+State 43 conflicts: 1 shift/reduce
+State 46 conflicts: 3 shift/reduce
+State 68 conflicts: 4 shift/reduce
+State 69 conflicts: 1 shift/reduce
+State 70 conflicts: 3 shift/reduce
+State 82 conflicts: 2 reduce/reduce
+State 83 conflicts: 2 reduce/reduce
+State 154 conflicts: 2 shift/reduce
+State 155 conflicts: 2 shift/reduce
+State 156 conflicts: 2 shift/reduce
+State 157 conflicts: 2 shift/reduce
+State 158 conflicts: 8 shift/reduce
+State 159 conflicts: 8 shift/reduce
+State 160 conflicts: 2 shift/reduce
+State 161 conflicts: 2 shift/reduce
+State 173 conflicts: 2 reduce/reduce
+State 185 conflicts: 1 shift/reduce
+State 186 conflicts: 3 shift/reduce
+State 204 conflicts: 1 shift/reduce
+State 205 conflicts: 3 shift/reduce
 
 
 Grammar
@@ -26,132 +32,164 @@ Grammar
     2 declaratii: declaratie ';'
     3           | declaratii declaratie ';'
 
-    4 declaratie: TIP ID
-    5           | CONST TIP ID
-    6           | STRUCT ID '{' declaratii '}'
+    4 declaratie: STRUCT ID '{' declaratii_struct '}'
+    5           | TIP ID
+    6           | CONST TIP ID
     7           | TIP ID '(' lista_param ')'
     8           | TIP ID '(' ')'
     9           | ARRAY LT TIP ',' INTEGER GT ID
 
-   10 lista_param: param
-   11            | lista_param ',' param
+   10 declaratii_struct: declaratie_struct ';'
+   11                  | declaratii_struct declaratie_struct ';'
 
-   12 param: TIP ID
+   12 declaratie_struct: TIP ID
+   13                  | CONST TIP ID
+   14                  | STRUCT ID '{' declaratii_struct '}'
+   15                  | TIP ID '(' lista_param ')'
+   16                  | TIP ID '(' ')'
+   17                  | ARRAY LT TIP ',' INTEGER GT ID
 
-   13 conditie: ID
-   14         | STRING
-   15         | INTEGER
-   16         | BOOLEAN
-   17         | FLOAT
-   18         | conditie LT conditie
-   19         | conditie GT conditie
-   20         | conditie LTE conditie
-   21         | conditie GTE conditie
-   22         | conditie EQ conditie
-   23         | conditie NEQ conditie
-   24         | conditie OR conditie
-   25         | conditie AND conditie
-   26         | '(' conditie ')'
+   18 lista_param: param
+   19            | lista_param ',' param
 
-   27 bloc: '{' lista_instructiuni '}'
+   20 declaratii_in_functie: TIP ID ';'
+   21                      | CONST TIP ID ';'
+   22                      | STRUCT ID '{' declaratii_in_functie '}'
+   23                      | TIP ID '(' ')' ';'
+   24                      | ARRAY LT TIP ',' INTEGER GT ID ';'
 
-   28 bloc_main: MAIN '{' lista_instructiuni '}'
+   25 lista_param_functii_definite: param_fd
+   26                             | lista_param_functii_definite ',' param_fd
 
-   29 lista_functii: functie
-   30              | lista_functii functie
+   27 param: TIP ID
 
-   31 functie: FUNCTION TIP ID '(' lista_param ')' bloc
-   32        | %empty
+   28 param_fd: TIP ID
 
-   33 lista_instructiuni: lista_control
-   34                   | lista_statement
-   35                   | lista_instructiuni lista_control
-   36                   | lista_instructiuni lista_statement
+   29 conditie: ID
+   30         | STRING
+   31         | INTEGER
+   32         | BOOLEAN
+   33         | FLOAT
+   34         | conditie LT conditie
+   35         | conditie GT conditie
+   36         | conditie LTE conditie
+   37         | conditie GTE conditie
+   38         | conditie EQ conditie
+   39         | conditie NEQ conditie
+   40         | conditie OR conditie
+   41         | conditie AND conditie
+   42         | '(' conditie ')'
 
-   37 lista_statement: statement ';'
-   38                | lista_statement statement ';'
+   43 bloc_main: MAIN '{' lista_instructiuni_main '}'
 
-   39 statement: ID ASSIGN ID
-   40          | ID ASSIGN INTEGER
-   41          | ID ASSIGN expresie
-   42          | ID ASSIGN FLOAT
-   43          | ID ASSIGN BOOLEAN
-   44          | ID ASSIGN '"' STRING '"'
-   45          | ID '.' ID ASSIGN ID '.' ID
-   46          | ID '.' ID ASSIGN INTEGER
-   47          | ID '.' ID ASSIGN FLOAT
-   48          | ID '.' ID ASSIGN BOOLEAN
-   49          | ID '.' ID ASSIGN '"' STRING '"'
-   50          | ID '(' lista_apel ')'
-   51          | ID '[' INTEGER ']' ASSIGN ID '[' INTEGER ']'
-   52          | ID '[' INTEGER ']' ASSIGN INTEGER
-   53          | ID '[' INTEGER ']' ASSIGN '"' STRING '"'
-   54          | ID '[' INTEGER ']' ASSIGN FLOAT
-   55          | ID '[' INTEGER ']' ASSIGN BOOLEAN
-   56          | ID '[' INTEGER ']' ASSIGN expresie
+   44 lista_functii: functie
+   45              | lista_functii functie
 
-   57 expresie: expresie PLUS expresie
-   58         | expresie MINUS expresie
-   59         | expresie MULT expresie
-   60         | expresie SUBT expresie
-   61         | '(' expresie ')'
-   62         | ID
-   63         | INTEGER
+   46 functie: FUNCTION TIP ID '(' lista_param_functii_definite ')' bloc_functie
+   47        | %empty
 
-   64 control: IF '(' conditie ')' '{' lista_instructiuni '}'
-   65        | IF '(' conditie ')' ELSE '{' lista_instructiuni '}'
-   66        | FOR '(' statement ';' conditie ';' statement ')' '{' lista_instructiuni '}'
-   67        | WHILE '(' conditie ')' '{' lista_instructiuni '}'
+   48 bloc_functie: '{' lista_instructiuni '}'
 
-   68 lista_control: control
-   69              | lista_control control
+   49 lista_instructiuni: lista_control
+   50                   | lista_statement
+   51                   | declaratii_in_functie
+   52                   | lista_instructiuni lista_control
+   53                   | lista_instructiuni lista_statement
+   54                   | lista_instructiuni declaratii_in_functie
 
-   70 lista_apel: INTEGER
-   71           | lista_apel ',' INTEGER
+   55 lista_instructiuni_main: lista_control
+   56                        | lista_statement
+   57                        | declaratii
+   58                        | lista_instructiuni_main lista_control
+   59                        | lista_instructiuni_main lista_statement
+   60                        | lista_instructiuni_main declaratii
+
+   61 lista_statement: statement ';'
+   62                | lista_statement statement ';'
+
+   63 statement: ID ASSIGN ID
+   64          | ID ASSIGN INTEGER
+   65          | ID ASSIGN expresie
+   66          | ID ASSIGN FLOAT
+   67          | ID ASSIGN BOOLEAN
+   68          | ID ASSIGN '"' STRING '"'
+   69          | ID '.' ID ASSIGN ID '.' ID
+   70          | ID '.' ID ASSIGN INTEGER
+   71          | ID '.' ID ASSIGN FLOAT
+   72          | ID '.' ID ASSIGN BOOLEAN
+   73          | ID '.' ID ASSIGN '"' STRING '"'
+   74          | ID '[' INTEGER ']' ASSIGN ID '[' INTEGER ']'
+   75          | ID '[' INTEGER ']' ASSIGN INTEGER
+   76          | ID '[' INTEGER ']' ASSIGN '"' STRING '"'
+   77          | ID '[' INTEGER ']' ASSIGN FLOAT
+   78          | ID '[' INTEGER ']' ASSIGN BOOLEAN
+   79          | ID '[' INTEGER ']' ASSIGN expresie
+   80          | ID '(' lista_apel ')'
+
+   81 expresie: expresie PLUS expresie
+   82         | expresie MINUS expresie
+   83         | expresie MULT expresie
+   84         | expresie SUBT expresie
+   85         | '(' expresie ')'
+   86         | ID
+   87         | INTEGER
+
+   88 control: IF '(' conditie ')' '{' lista_instructiuni '}'
+   89        | IF '(' conditie ')' ELSE '{' lista_instructiuni '}'
+   90        | FOR '(' statement ';' conditie ';' statement ')' '{' lista_instructiuni '}'
+   91        | WHILE '(' conditie ')' '{' lista_instructiuni '}'
+
+   92 lista_control: control
+   93              | lista_control control
+
+   94 lista_apel: tipuri
+   95           | lista_apel ',' tipuri
+
+   96 tipuri: INTEGER
 
 
 Terminals, with rules where they appear
 
     $end (0) 0
-    '"' (34) 44 49 53
-    '(' (40) 7 8 26 31 50 61 64 65 66 67
-    ')' (41) 7 8 26 31 50 61 64 65 66 67
-    ',' (44) 9 11 71
-    '.' (46) 45 46 47 48 49
-    ';' (59) 2 3 37 38 66
-    '[' (91) 51 52 53 54 55 56
-    ']' (93) 51 52 53 54 55 56
-    '{' (123) 6 27 28 64 65 66 67
-    '}' (125) 6 27 28 64 65 66 67
+    '"' (34) 68 73 76
+    '(' (40) 7 8 15 16 23 42 46 80 85 88 89 90 91
+    ')' (41) 7 8 15 16 23 42 46 80 85 88 89 90 91
+    ',' (44) 9 17 19 24 26 95
+    '.' (46) 69 70 71 72 73
+    ';' (59) 2 3 10 11 20 21 23 24 61 62 90
+    '[' (91) 74 75 76 77 78 79
+    ']' (93) 74 75 76 77 78 79
+    '{' (123) 4 14 22 43 48 88 89 90 91
+    '}' (125) 4 14 22 43 48 88 89 90 91
     error (256)
-    ID <strval> (258) 4 5 6 7 8 9 12 13 31 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 62
-    TIP <strval> (259) 4 5 7 8 9 12 31
-    ASSIGN <strval> (260) 39 40 41 42 43 44 45 46 47 48 49 51 52 53 54 55 56
-    INTEGER <intval> (261) 9 15 40 46 51 52 53 54 55 56 63 70 71
-    MAIN <intval> (262) 28
-    STRUCT <intval> (263) 6
-    IF <intval> (264) 64 65
-    ELSE <intval> (265) 65
-    FOR <intval> (266) 66
-    WHILE <intval> (267) 67
-    AND <intval> (268) 25
-    OR <intval> (269) 24
-    LT <intval> (270) 9 18
-    GT <intval> (271) 9 19
-    LTE <intval> (272) 20
-    GTE <intval> (273) 21
-    PLUS <intval> (274) 57
-    MINUS <intval> (275) 58
-    MULT <intval> (276) 59
-    SUBT <intval> (277) 60
-    EQ <intval> (278) 22
-    NEQ <intval> (279) 23
-    STRING <strval> (280) 14 44 49 53
-    BOOLEAN <boolval> (281) 16 43 48 55
-    FLOAT <floatval> (282) 17 42 47 54
-    CONST <floatval> (283) 5
-    FUNCTION <floatval> (284) 31
-    ARRAY <floatval> (285) 9
+    ID <strval> (258) 4 5 6 7 8 9 12 13 14 15 16 17 20 21 22 23 24 27 28 29 46 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 86
+    TIP <strval> (259) 5 6 7 8 9 12 13 15 16 17 20 21 23 24 27 28 46
+    ASSIGN <strval> (260) 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79
+    INTEGER <strval> (261) 9 17 24 31 64 70 74 75 76 77 78 79 87 96
+    MAIN <strval> (262) 43
+    STRUCT <strval> (263) 4 14 22
+    IF <strval> (264) 88 89
+    ELSE <strval> (265) 89
+    FOR <strval> (266) 90
+    WHILE <strval> (267) 91
+    AND <strval> (268) 41
+    OR <strval> (269) 40
+    LT <strval> (270) 9 17 24 34
+    GT <strval> (271) 9 17 24 35
+    LTE <strval> (272) 36
+    GTE <strval> (273) 37
+    PLUS <strval> (274) 81
+    MINUS <strval> (275) 82
+    MULT <strval> (276) 83
+    SUBT <strval> (277) 84
+    EQ <strval> (278) 38
+    NEQ <strval> (279) 39
+    STRING <strval> (280) 30 68 73 76
+    BOOLEAN <boolval> (281) 32 67 72 78
+    FLOAT <floatval> (282) 33 66 71 77
+    CONST <floatval> (283) 6 13 21
+    FUNCTION <strval> (284) 46
+    ARRAY <strval> (285) 9 17 24
 
 
 Nonterminals, with rules where they appear
@@ -163,66 +201,78 @@ Nonterminals, with rules where they appear
         on right: 0
     declaratii (43)
         on left: 2 3
-        on right: 1 3 6
+        on right: 1 3 57 60
     declaratie (44)
         on left: 4 5 6 7 8 9
         on right: 2 3
-    lista_param (45)
+    declaratii_struct (45)
         on left: 10 11
-        on right: 7 11 31
-    param (46)
-        on left: 12
+        on right: 4 11 14
+    declaratie_struct (46)
+        on left: 12 13 14 15 16 17
         on right: 10 11
-    conditie (47)
-        on left: 13 14 15 16 17 18 19 20 21 22 23 24 25 26
-        on right: 18 19 20 21 22 23 24 25 26 64 65 66 67
-    bloc (48)
+    lista_param (47)
+        on left: 18 19
+        on right: 7 15 19
+    declaratii_in_functie (48)
+        on left: 20 21 22 23 24
+        on right: 22 51 54
+    lista_param_functii_definite (49)
+        on left: 25 26
+        on right: 26 46
+    param (50)
         on left: 27
-        on right: 31
-    bloc_main (49)
+        on right: 18 19
+    param_fd (51)
         on left: 28
+        on right: 25 26
+    conditie (52)
+        on left: 29 30 31 32 33 34 35 36 37 38 39 40 41 42
+        on right: 34 35 36 37 38 39 40 41 42 88 89 90 91
+    bloc_main (53)
+        on left: 43
         on right: 1
-    lista_functii (50)
-        on left: 29 30
-        on right: 1 30
-    functie (51)
-        on left: 31 32
-        on right: 29 30
-    lista_instructiuni (52)
-        on left: 33 34 35 36
-        on right: 27 28 35 36 64 65 66 67
-    lista_statement (53)
-        on left: 37 38
-        on right: 34 36 38
-    statement (54)
-        on left: 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56
-        on right: 37 38 66
-    expresie (55)
-        on left: 57 58 59 60 61 62 63
-        on right: 41 56 57 58 59 60 61
-    control (56)
-        on left: 64 65 66 67
-        on right: 68 69
-    lista_control (57)
-        on left: 68 69
-        on right: 33 35 69
-    lista_apel (58)
-        on left: 70 71
-        on right: 50 71
+    lista_functii (54)
+        on left: 44 45
+        on right: 1 45
+    functie (55)
+        on left: 46 47
+        on right: 44 45
+    bloc_functie (56)
+        on left: 48
+        on right: 46
+    lista_instructiuni (57)
+        on left: 49 50 51 52 53 54
+        on right: 48 52 53 54 88 89 90 91
+    lista_instructiuni_main (58)
+        on left: 55 56 57 58 59 60
+        on right: 43 58 59 60
+    lista_statement (59)
+        on left: 61 62
+        on right: 50 53 56 59 62
+    statement (60)
+        on left: 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80
+        on right: 61 62 90
+    expresie (61)
+        on left: 81 82 83 84 85 86 87
+        on right: 65 79 81 82 83 84 85
+    control (62)
+        on left: 88 89 90 91
+        on right: 92 93
+    lista_control (63)
+        on left: 92 93
+        on right: 49 52 55 58 93
+    lista_apel (64)
+        on left: 94 95
+        on right: 80 95
+    tipuri (65)
+        on left: 96
+        on right: 94 95
 
 
 State 0
 
     0 $accept: . progr $end
-    1 progr: . declaratii bloc_main lista_functii
-    2 declaratii: . declaratie ';'
-    3           | . declaratii declaratie ';'
-    4 declaratie: . TIP ID
-    5           | . CONST TIP ID
-    6           | . STRUCT ID '{' declaratii '}'
-    7           | . TIP ID '(' lista_param ')'
-    8           | . TIP ID '(' ')'
-    9           | . ARRAY LT TIP ',' INTEGER GT ID
 
     TIP     shift, and go to state 1
     STRUCT  shift, and go to state 2
@@ -236,7 +286,7 @@ State 0
 
 State 1
 
-    4 declaratie: TIP . ID
+    5 declaratie: TIP . ID
     7           | TIP . ID '(' lista_param ')'
     8           | TIP . ID '(' ')'
 
@@ -245,14 +295,14 @@ State 1
 
 State 2
 
-    6 declaratie: STRUCT . ID '{' declaratii '}'
+    4 declaratie: STRUCT . ID '{' declaratii_struct '}'
 
     ID  shift, and go to state 9
 
 
 State 3
 
-    5 declaratie: CONST . TIP ID
+    6 declaratie: CONST . TIP ID
 
     TIP  shift, and go to state 10
 
@@ -275,13 +325,6 @@ State 6
 
     1 progr: declaratii . bloc_main lista_functii
     3 declaratii: declaratii . declaratie ';'
-    4 declaratie: . TIP ID
-    5           | . CONST TIP ID
-    6           | . STRUCT ID '{' declaratii '}'
-    7           | . TIP ID '(' lista_param ')'
-    8           | . TIP ID '(' ')'
-    9           | . ARRAY LT TIP ',' INTEGER GT ID
-   28 bloc_main: . MAIN '{' lista_instructiuni '}'
 
     TIP     shift, and go to state 1
     MAIN    shift, and go to state 13
@@ -302,25 +345,25 @@ State 7
 
 State 8
 
-    4 declaratie: TIP ID .  [';']
+    5 declaratie: TIP ID .
     7           | TIP ID . '(' lista_param ')'
     8           | TIP ID . '(' ')'
 
     '('  shift, and go to state 17
 
-    $default  reduce using rule 4 (declaratie)
+    $default  reduce using rule 5 (declaratie)
 
 
 State 9
 
-    6 declaratie: STRUCT ID . '{' declaratii '}'
+    4 declaratie: STRUCT ID . '{' declaratii_struct '}'
 
     '{'  shift, and go to state 18
 
 
 State 10
 
-    5 declaratie: CONST TIP . ID
+    6 declaratie: CONST TIP . ID
 
     ID  shift, and go to state 19
 
@@ -341,7 +384,7 @@ State 12
 
 State 13
 
-   28 bloc_main: MAIN . '{' lista_instructiuni '}'
+   43 bloc_main: MAIN . '{' lista_instructiuni_main '}'
 
     '{'  shift, and go to state 21
 
@@ -356,15 +399,11 @@ State 14
 State 15
 
     1 progr: declaratii bloc_main . lista_functii
-   29 lista_functii: . functie
-   30              | . lista_functii functie
-   31 functie: . FUNCTION TIP ID '(' lista_param ')' bloc
-   32        | . %empty  [$end, FUNCTION]
 
     FUNCTION  shift, and go to state 23
 
-    FUNCTION  [reduce using rule 32 (functie)]
-    $default  reduce using rule 32 (functie)
+    FUNCTION  [reduce using rule 47 (functie)]
+    $default  reduce using rule 47 (functie)
 
     lista_functii  go to state 24
     functie        go to state 25
@@ -381,9 +420,6 @@ State 17
 
     7 declaratie: TIP ID '(' . lista_param ')'
     8           | TIP ID '(' . ')'
-   10 lista_param: . param
-   11            | . lista_param ',' param
-   12 param: . TIP ID
 
     TIP  shift, and go to state 26
     ')'  shift, and go to state 27
@@ -394,83 +430,51 @@ State 17
 
 State 18
 
-    2 declaratii: . declaratie ';'
-    3           | . declaratii declaratie ';'
-    4 declaratie: . TIP ID
-    5           | . CONST TIP ID
-    6           | . STRUCT ID '{' declaratii '}'
-    6           | STRUCT ID '{' . declaratii '}'
-    7           | . TIP ID '(' lista_param ')'
-    8           | . TIP ID '(' ')'
-    9           | . ARRAY LT TIP ',' INTEGER GT ID
+    4 declaratie: STRUCT ID '{' . declaratii_struct '}'
 
-    TIP     shift, and go to state 1
-    STRUCT  shift, and go to state 2
-    CONST   shift, and go to state 3
-    ARRAY   shift, and go to state 4
+    TIP     shift, and go to state 30
+    STRUCT  shift, and go to state 31
+    CONST   shift, and go to state 32
+    ARRAY   shift, and go to state 33
 
-    declaratii  go to state 30
-    declaratie  go to state 7
+    declaratii_struct  go to state 34
+    declaratie_struct  go to state 35
 
 
 State 19
 
-    5 declaratie: CONST TIP ID .
+    6 declaratie: CONST TIP ID .
 
-    $default  reduce using rule 5 (declaratie)
+    $default  reduce using rule 6 (declaratie)
 
 
 State 20
 
     9 declaratie: ARRAY LT TIP . ',' INTEGER GT ID
 
-    ','  shift, and go to state 31
+    ','  shift, and go to state 36
 
 
 State 21
 
-   28 bloc_main: MAIN '{' . lista_instructiuni '}'
-   33 lista_instructiuni: . lista_control
-   34                   | . lista_statement
-   35                   | . lista_instructiuni lista_control
-   36                   | . lista_instructiuni lista_statement
-   37 lista_statement: . statement ';'
-   38                | . lista_statement statement ';'
-   39 statement: . ID ASSIGN ID
-   40          | . ID ASSIGN INTEGER
-   41          | . ID ASSIGN expresie
-   42          | . ID ASSIGN FLOAT
-   43          | . ID ASSIGN BOOLEAN
-   44          | . ID ASSIGN '"' STRING '"'
-   45          | . ID '.' ID ASSIGN ID '.' ID
-   46          | . ID '.' ID ASSIGN INTEGER
-   47          | . ID '.' ID ASSIGN FLOAT
-   48          | . ID '.' ID ASSIGN BOOLEAN
-   49          | . ID '.' ID ASSIGN '"' STRING '"'
-   50          | . ID '(' lista_apel ')'
-   51          | . ID '[' INTEGER ']' ASSIGN ID '[' INTEGER ']'
-   52          | . ID '[' INTEGER ']' ASSIGN INTEGER
-   53          | . ID '[' INTEGER ']' ASSIGN '"' STRING '"'
-   54          | . ID '[' INTEGER ']' ASSIGN FLOAT
-   55          | . ID '[' INTEGER ']' ASSIGN BOOLEAN
-   56          | . ID '[' INTEGER ']' ASSIGN expresie
-   64 control: . IF '(' conditie ')' '{' lista_instructiuni '}'
-   65        | . IF '(' conditie ')' ELSE '{' lista_instructiuni '}'
-   66        | . FOR '(' statement ';' conditie ';' statement ')' '{' lista_instructiuni '}'
-   67        | . WHILE '(' conditie ')' '{' lista_instructiuni '}'
-   68 lista_control: . control
-   69              | . lista_control control
+   43 bloc_main: MAIN '{' . lista_instructiuni_main '}'
 
-    ID     shift, and go to state 32
-    IF     shift, and go to state 33
-    FOR    shift, and go to state 34
-    WHILE  shift, and go to state 35
+    ID      shift, and go to state 37
+    TIP     shift, and go to state 1
+    STRUCT  shift, and go to state 2
+    IF      shift, and go to state 38
+    FOR     shift, and go to state 39
+    WHILE   shift, and go to state 40
+    CONST   shift, and go to state 3
+    ARRAY   shift, and go to state 4
 
-    lista_instructiuni  go to state 36
-    lista_statement     go to state 37
-    statement           go to state 38
-    control             go to state 39
-    lista_control       go to state 40
+    declaratii               go to state 41
+    declaratie               go to state 7
+    lista_instructiuni_main  go to state 42
+    lista_statement          go to state 43
+    statement                go to state 44
+    control                  go to state 45
+    lista_control            go to state 46
 
 
 State 22
@@ -482,40 +486,38 @@ State 22
 
 State 23
 
-   31 functie: FUNCTION . TIP ID '(' lista_param ')' bloc
+   46 functie: FUNCTION . TIP ID '(' lista_param_functii_definite ')' bloc_functie
 
-    TIP  shift, and go to state 41
+    TIP  shift, and go to state 47
 
 
 State 24
 
-    1 progr: declaratii bloc_main lista_functii .  [$end]
-   30 lista_functii: lista_functii . functie
-   31 functie: . FUNCTION TIP ID '(' lista_param ')' bloc
-   32        | . %empty  [$end, FUNCTION]
+    1 progr: declaratii bloc_main lista_functii .
+   45 lista_functii: lista_functii . functie
 
     FUNCTION  shift, and go to state 23
 
     $end      reduce using rule 1 (progr)
-    $end      [reduce using rule 32 (functie)]
-    FUNCTION  [reduce using rule 32 (functie)]
+    $end      [reduce using rule 47 (functie)]
+    FUNCTION  [reduce using rule 47 (functie)]
     $default  reduce using rule 1 (progr)
 
-    functie  go to state 42
+    functie  go to state 48
 
 
 State 25
 
-   29 lista_functii: functie .
+   44 lista_functii: functie .
 
-    $default  reduce using rule 29 (lista_functii)
+    $default  reduce using rule 44 (lista_functii)
 
 
 State 26
 
-   12 param: TIP . ID
+   27 param: TIP . ID
 
-    ID  shift, and go to state 43
+    ID  shift, and go to state 49
 
 
 State 27
@@ -528,2300 +530,2213 @@ State 27
 State 28
 
     7 declaratie: TIP ID '(' lista_param . ')'
-   11 lista_param: lista_param . ',' param
+   19 lista_param: lista_param . ',' param
 
-    ')'  shift, and go to state 44
-    ','  shift, and go to state 45
+    ')'  shift, and go to state 50
+    ','  shift, and go to state 51
 
 
 State 29
 
-   10 lista_param: param .
+   18 lista_param: param .
 
-    $default  reduce using rule 10 (lista_param)
+    $default  reduce using rule 18 (lista_param)
 
 
 State 30
 
+   12 declaratie_struct: TIP . ID
+   15                  | TIP . ID '(' lista_param ')'
+   16                  | TIP . ID '(' ')'
+
+    ID  shift, and go to state 52
+
+
+State 31
+
+   14 declaratie_struct: STRUCT . ID '{' declaratii_struct '}'
+
+    ID  shift, and go to state 53
+
+
+State 32
+
+   13 declaratie_struct: CONST . TIP ID
+
+    TIP  shift, and go to state 54
+
+
+State 33
+
+   17 declaratie_struct: ARRAY . LT TIP ',' INTEGER GT ID
+
+    LT  shift, and go to state 55
+
+
+State 34
+
+    4 declaratie: STRUCT ID '{' declaratii_struct . '}'
+   11 declaratii_struct: declaratii_struct . declaratie_struct ';'
+
+    TIP     shift, and go to state 30
+    STRUCT  shift, and go to state 31
+    CONST   shift, and go to state 32
+    ARRAY   shift, and go to state 33
+    '}'     shift, and go to state 56
+
+    declaratie_struct  go to state 57
+
+
+State 35
+
+   10 declaratii_struct: declaratie_struct . ';'
+
+    ';'  shift, and go to state 58
+
+
+State 36
+
+    9 declaratie: ARRAY LT TIP ',' . INTEGER GT ID
+
+    INTEGER  shift, and go to state 59
+
+
+State 37
+
+   63 statement: ID . ASSIGN ID
+   64          | ID . ASSIGN INTEGER
+   65          | ID . ASSIGN expresie
+   66          | ID . ASSIGN FLOAT
+   67          | ID . ASSIGN BOOLEAN
+   68          | ID . ASSIGN '"' STRING '"'
+   69          | ID . '.' ID ASSIGN ID '.' ID
+   70          | ID . '.' ID ASSIGN INTEGER
+   71          | ID . '.' ID ASSIGN FLOAT
+   72          | ID . '.' ID ASSIGN BOOLEAN
+   73          | ID . '.' ID ASSIGN '"' STRING '"'
+   74          | ID . '[' INTEGER ']' ASSIGN ID '[' INTEGER ']'
+   75          | ID . '[' INTEGER ']' ASSIGN INTEGER
+   76          | ID . '[' INTEGER ']' ASSIGN '"' STRING '"'
+   77          | ID . '[' INTEGER ']' ASSIGN FLOAT
+   78          | ID . '[' INTEGER ']' ASSIGN BOOLEAN
+   79          | ID . '[' INTEGER ']' ASSIGN expresie
+   80          | ID . '(' lista_apel ')'
+
+    ASSIGN  shift, and go to state 60
+    '('     shift, and go to state 61
+    '.'     shift, and go to state 62
+    '['     shift, and go to state 63
+
+
+State 38
+
+   88 control: IF . '(' conditie ')' '{' lista_instructiuni '}'
+   89        | IF . '(' conditie ')' ELSE '{' lista_instructiuni '}'
+
+    '('  shift, and go to state 64
+
+
+State 39
+
+   90 control: FOR . '(' statement ';' conditie ';' statement ')' '{' lista_instructiuni '}'
+
+    '('  shift, and go to state 65
+
+
+State 40
+
+   91 control: WHILE . '(' conditie ')' '{' lista_instructiuni '}'
+
+    '('  shift, and go to state 66
+
+
+State 41
+
     3 declaratii: declaratii . declaratie ';'
-    4 declaratie: . TIP ID
-    5           | . CONST TIP ID
-    6           | . STRUCT ID '{' declaratii '}'
-    6           | STRUCT ID '{' declaratii . '}'
-    7           | . TIP ID '(' lista_param ')'
-    8           | . TIP ID '(' ')'
-    9           | . ARRAY LT TIP ',' INTEGER GT ID
+   57 lista_instructiuni_main: declaratii .
 
     TIP     shift, and go to state 1
     STRUCT  shift, and go to state 2
     CONST   shift, and go to state 3
     ARRAY   shift, and go to state 4
-    '}'     shift, and go to state 46
+
+    TIP       [reduce using rule 57 (lista_instructiuni_main)]
+    STRUCT    [reduce using rule 57 (lista_instructiuni_main)]
+    CONST     [reduce using rule 57 (lista_instructiuni_main)]
+    ARRAY     [reduce using rule 57 (lista_instructiuni_main)]
+    $default  reduce using rule 57 (lista_instructiuni_main)
 
     declaratie  go to state 14
 
 
-State 31
-
-    9 declaratie: ARRAY LT TIP ',' . INTEGER GT ID
-
-    INTEGER  shift, and go to state 47
-
-
-State 32
-
-   39 statement: ID . ASSIGN ID
-   40          | ID . ASSIGN INTEGER
-   41          | ID . ASSIGN expresie
-   42          | ID . ASSIGN FLOAT
-   43          | ID . ASSIGN BOOLEAN
-   44          | ID . ASSIGN '"' STRING '"'
-   45          | ID . '.' ID ASSIGN ID '.' ID
-   46          | ID . '.' ID ASSIGN INTEGER
-   47          | ID . '.' ID ASSIGN FLOAT
-   48          | ID . '.' ID ASSIGN BOOLEAN
-   49          | ID . '.' ID ASSIGN '"' STRING '"'
-   50          | ID . '(' lista_apel ')'
-   51          | ID . '[' INTEGER ']' ASSIGN ID '[' INTEGER ']'
-   52          | ID . '[' INTEGER ']' ASSIGN INTEGER
-   53          | ID . '[' INTEGER ']' ASSIGN '"' STRING '"'
-   54          | ID . '[' INTEGER ']' ASSIGN FLOAT
-   55          | ID . '[' INTEGER ']' ASSIGN BOOLEAN
-   56          | ID . '[' INTEGER ']' ASSIGN expresie
-
-    ASSIGN  shift, and go to state 48
-    '('     shift, and go to state 49
-    '.'     shift, and go to state 50
-    '['     shift, and go to state 51
-
-
-State 33
-
-   64 control: IF . '(' conditie ')' '{' lista_instructiuni '}'
-   65        | IF . '(' conditie ')' ELSE '{' lista_instructiuni '}'
-
-    '('  shift, and go to state 52
-
-
-State 34
-
-   66 control: FOR . '(' statement ';' conditie ';' statement ')' '{' lista_instructiuni '}'
-
-    '('  shift, and go to state 53
-
-
-State 35
-
-   67 control: WHILE . '(' conditie ')' '{' lista_instructiuni '}'
-
-    '('  shift, and go to state 54
-
-
-State 36
-
-   28 bloc_main: MAIN '{' lista_instructiuni . '}'
-   35 lista_instructiuni: lista_instructiuni . lista_control
-   36                   | lista_instructiuni . lista_statement
-   37 lista_statement: . statement ';'
-   38                | . lista_statement statement ';'
-   39 statement: . ID ASSIGN ID
-   40          | . ID ASSIGN INTEGER
-   41          | . ID ASSIGN expresie
-   42          | . ID ASSIGN FLOAT
-   43          | . ID ASSIGN BOOLEAN
-   44          | . ID ASSIGN '"' STRING '"'
-   45          | . ID '.' ID ASSIGN ID '.' ID
-   46          | . ID '.' ID ASSIGN INTEGER
-   47          | . ID '.' ID ASSIGN FLOAT
-   48          | . ID '.' ID ASSIGN BOOLEAN
-   49          | . ID '.' ID ASSIGN '"' STRING '"'
-   50          | . ID '(' lista_apel ')'
-   51          | . ID '[' INTEGER ']' ASSIGN ID '[' INTEGER ']'
-   52          | . ID '[' INTEGER ']' ASSIGN INTEGER
-   53          | . ID '[' INTEGER ']' ASSIGN '"' STRING '"'
-   54          | . ID '[' INTEGER ']' ASSIGN FLOAT
-   55          | . ID '[' INTEGER ']' ASSIGN BOOLEAN
-   56          | . ID '[' INTEGER ']' ASSIGN expresie
-   64 control: . IF '(' conditie ')' '{' lista_instructiuni '}'
-   65        | . IF '(' conditie ')' ELSE '{' lista_instructiuni '}'
-   66        | . FOR '(' statement ';' conditie ';' statement ')' '{' lista_instructiuni '}'
-   67        | . WHILE '(' conditie ')' '{' lista_instructiuni '}'
-   68 lista_control: . control
-   69              | . lista_control control
-
-    ID     shift, and go to state 32
-    IF     shift, and go to state 33
-    FOR    shift, and go to state 34
-    WHILE  shift, and go to state 35
-    '}'    shift, and go to state 55
-
-    lista_statement  go to state 56
-    statement        go to state 38
-    control          go to state 39
-    lista_control    go to state 57
-
-
-State 37
-
-   34 lista_instructiuni: lista_statement .  [ID, IF, FOR, WHILE, '}']
-   38 lista_statement: lista_statement . statement ';'
-   39 statement: . ID ASSIGN ID
-   40          | . ID ASSIGN INTEGER
-   41          | . ID ASSIGN expresie
-   42          | . ID ASSIGN FLOAT
-   43          | . ID ASSIGN BOOLEAN
-   44          | . ID ASSIGN '"' STRING '"'
-   45          | . ID '.' ID ASSIGN ID '.' ID
-   46          | . ID '.' ID ASSIGN INTEGER
-   47          | . ID '.' ID ASSIGN FLOAT
-   48          | . ID '.' ID ASSIGN BOOLEAN
-   49          | . ID '.' ID ASSIGN '"' STRING '"'
-   50          | . ID '(' lista_apel ')'
-   51          | . ID '[' INTEGER ']' ASSIGN ID '[' INTEGER ']'
-   52          | . ID '[' INTEGER ']' ASSIGN INTEGER
-   53          | . ID '[' INTEGER ']' ASSIGN '"' STRING '"'
-   54          | . ID '[' INTEGER ']' ASSIGN FLOAT
-   55          | . ID '[' INTEGER ']' ASSIGN BOOLEAN
-   56          | . ID '[' INTEGER ']' ASSIGN expresie
-
-    ID  shift, and go to state 32
-
-    ID        [reduce using rule 34 (lista_instructiuni)]
-    $default  reduce using rule 34 (lista_instructiuni)
-
-    statement  go to state 58
-
-
-State 38
-
-   37 lista_statement: statement . ';'
-
-    ';'  shift, and go to state 59
-
-
-State 39
-
-   68 lista_control: control .
-
-    $default  reduce using rule 68 (lista_control)
-
-
-State 40
-
-   33 lista_instructiuni: lista_control .  [ID, IF, FOR, WHILE, '}']
-   64 control: . IF '(' conditie ')' '{' lista_instructiuni '}'
-   65        | . IF '(' conditie ')' ELSE '{' lista_instructiuni '}'
-   66        | . FOR '(' statement ';' conditie ';' statement ')' '{' lista_instructiuni '}'
-   67        | . WHILE '(' conditie ')' '{' lista_instructiuni '}'
-   69 lista_control: lista_control . control
-
-    IF     shift, and go to state 33
-    FOR    shift, and go to state 34
-    WHILE  shift, and go to state 35
-
-    IF        [reduce using rule 33 (lista_instructiuni)]
-    FOR       [reduce using rule 33 (lista_instructiuni)]
-    WHILE     [reduce using rule 33 (lista_instructiuni)]
-    $default  reduce using rule 33 (lista_instructiuni)
-
-    control  go to state 60
-
-
-State 41
-
-   31 functie: FUNCTION TIP . ID '(' lista_param ')' bloc
-
-    ID  shift, and go to state 61
-
-
 State 42
 
-   30 lista_functii: lista_functii functie .
+   43 bloc_main: MAIN '{' lista_instructiuni_main . '}'
+   58 lista_instructiuni_main: lista_instructiuni_main . lista_control
+   59                        | lista_instructiuni_main . lista_statement
+   60                        | lista_instructiuni_main . declaratii
 
-    $default  reduce using rule 30 (lista_functii)
+    ID      shift, and go to state 37
+    TIP     shift, and go to state 1
+    STRUCT  shift, and go to state 2
+    IF      shift, and go to state 38
+    FOR     shift, and go to state 39
+    WHILE   shift, and go to state 40
+    CONST   shift, and go to state 3
+    ARRAY   shift, and go to state 4
+    '}'     shift, and go to state 67
+
+    declaratii       go to state 68
+    declaratie       go to state 7
+    lista_statement  go to state 69
+    statement        go to state 44
+    control          go to state 45
+    lista_control    go to state 70
 
 
 State 43
 
-   12 param: TIP ID .
+   56 lista_instructiuni_main: lista_statement .
+   62 lista_statement: lista_statement . statement ';'
 
-    $default  reduce using rule 12 (param)
+    ID  shift, and go to state 37
+
+    ID        [reduce using rule 56 (lista_instructiuni_main)]
+    $default  reduce using rule 56 (lista_instructiuni_main)
+
+    statement  go to state 71
 
 
 State 44
+
+   61 lista_statement: statement . ';'
+
+    ';'  shift, and go to state 72
+
+
+State 45
+
+   92 lista_control: control .
+
+    $default  reduce using rule 92 (lista_control)
+
+
+State 46
+
+   55 lista_instructiuni_main: lista_control .
+   93 lista_control: lista_control . control
+
+    IF     shift, and go to state 38
+    FOR    shift, and go to state 39
+    WHILE  shift, and go to state 40
+
+    IF        [reduce using rule 55 (lista_instructiuni_main)]
+    FOR       [reduce using rule 55 (lista_instructiuni_main)]
+    WHILE     [reduce using rule 55 (lista_instructiuni_main)]
+    $default  reduce using rule 55 (lista_instructiuni_main)
+
+    control  go to state 73
+
+
+State 47
+
+   46 functie: FUNCTION TIP . ID '(' lista_param_functii_definite ')' bloc_functie
+
+    ID  shift, and go to state 74
+
+
+State 48
+
+   45 lista_functii: lista_functii functie .
+
+    $default  reduce using rule 45 (lista_functii)
+
+
+State 49
+
+   27 param: TIP ID .
+
+    $default  reduce using rule 27 (param)
+
+
+State 50
 
     7 declaratie: TIP ID '(' lista_param ')' .
 
     $default  reduce using rule 7 (declaratie)
 
 
-State 45
+State 51
 
-   11 lista_param: lista_param ',' . param
-   12 param: . TIP ID
+   19 lista_param: lista_param ',' . param
 
     TIP  shift, and go to state 26
 
-    param  go to state 62
-
-
-State 46
-
-    6 declaratie: STRUCT ID '{' declaratii '}' .
-
-    $default  reduce using rule 6 (declaratie)
-
-
-State 47
-
-    9 declaratie: ARRAY LT TIP ',' INTEGER . GT ID
-
-    GT  shift, and go to state 63
-
-
-State 48
-
-   39 statement: ID ASSIGN . ID
-   40          | ID ASSIGN . INTEGER
-   41          | ID ASSIGN . expresie
-   42          | ID ASSIGN . FLOAT
-   43          | ID ASSIGN . BOOLEAN
-   44          | ID ASSIGN . '"' STRING '"'
-   57 expresie: . expresie PLUS expresie
-   58         | . expresie MINUS expresie
-   59         | . expresie MULT expresie
-   60         | . expresie SUBT expresie
-   61         | . '(' expresie ')'
-   62         | . ID
-   63         | . INTEGER
-
-    ID       shift, and go to state 64
-    INTEGER  shift, and go to state 65
-    BOOLEAN  shift, and go to state 66
-    FLOAT    shift, and go to state 67
-    '('      shift, and go to state 68
-    '"'      shift, and go to state 69
-
-    expresie  go to state 70
-
-
-State 49
-
-   50 statement: ID '(' . lista_apel ')'
-   70 lista_apel: . INTEGER
-   71           | . lista_apel ',' INTEGER
-
-    INTEGER  shift, and go to state 71
-
-    lista_apel  go to state 72
-
-
-State 50
-
-   45 statement: ID '.' . ID ASSIGN ID '.' ID
-   46          | ID '.' . ID ASSIGN INTEGER
-   47          | ID '.' . ID ASSIGN FLOAT
-   48          | ID '.' . ID ASSIGN BOOLEAN
-   49          | ID '.' . ID ASSIGN '"' STRING '"'
-
-    ID  shift, and go to state 73
-
-
-State 51
-
-   51 statement: ID '[' . INTEGER ']' ASSIGN ID '[' INTEGER ']'
-   52          | ID '[' . INTEGER ']' ASSIGN INTEGER
-   53          | ID '[' . INTEGER ']' ASSIGN '"' STRING '"'
-   54          | ID '[' . INTEGER ']' ASSIGN FLOAT
-   55          | ID '[' . INTEGER ']' ASSIGN BOOLEAN
-   56          | ID '[' . INTEGER ']' ASSIGN expresie
-
-    INTEGER  shift, and go to state 74
+    param  go to state 75
 
 
 State 52
 
-   13 conditie: . ID
-   14         | . STRING
-   15         | . INTEGER
-   16         | . BOOLEAN
-   17         | . FLOAT
-   18         | . conditie LT conditie
-   19         | . conditie GT conditie
-   20         | . conditie LTE conditie
-   21         | . conditie GTE conditie
-   22         | . conditie EQ conditie
-   23         | . conditie NEQ conditie
-   24         | . conditie OR conditie
-   25         | . conditie AND conditie
-   26         | . '(' conditie ')'
-   64 control: IF '(' . conditie ')' '{' lista_instructiuni '}'
-   65        | IF '(' . conditie ')' ELSE '{' lista_instructiuni '}'
+   12 declaratie_struct: TIP ID .
+   15                  | TIP ID . '(' lista_param ')'
+   16                  | TIP ID . '(' ')'
 
-    ID       shift, and go to state 75
-    INTEGER  shift, and go to state 76
-    STRING   shift, and go to state 77
-    BOOLEAN  shift, and go to state 78
-    FLOAT    shift, and go to state 79
-    '('      shift, and go to state 80
+    '('  shift, and go to state 76
 
-    conditie  go to state 81
+    $default  reduce using rule 12 (declaratie_struct)
 
 
 State 53
 
-   39 statement: . ID ASSIGN ID
-   40          | . ID ASSIGN INTEGER
-   41          | . ID ASSIGN expresie
-   42          | . ID ASSIGN FLOAT
-   43          | . ID ASSIGN BOOLEAN
-   44          | . ID ASSIGN '"' STRING '"'
-   45          | . ID '.' ID ASSIGN ID '.' ID
-   46          | . ID '.' ID ASSIGN INTEGER
-   47          | . ID '.' ID ASSIGN FLOAT
-   48          | . ID '.' ID ASSIGN BOOLEAN
-   49          | . ID '.' ID ASSIGN '"' STRING '"'
-   50          | . ID '(' lista_apel ')'
-   51          | . ID '[' INTEGER ']' ASSIGN ID '[' INTEGER ']'
-   52          | . ID '[' INTEGER ']' ASSIGN INTEGER
-   53          | . ID '[' INTEGER ']' ASSIGN '"' STRING '"'
-   54          | . ID '[' INTEGER ']' ASSIGN FLOAT
-   55          | . ID '[' INTEGER ']' ASSIGN BOOLEAN
-   56          | . ID '[' INTEGER ']' ASSIGN expresie
-   66 control: FOR '(' . statement ';' conditie ';' statement ')' '{' lista_instructiuni '}'
+   14 declaratie_struct: STRUCT ID . '{' declaratii_struct '}'
 
-    ID  shift, and go to state 32
-
-    statement  go to state 82
+    '{'  shift, and go to state 77
 
 
 State 54
 
-   13 conditie: . ID
-   14         | . STRING
-   15         | . INTEGER
-   16         | . BOOLEAN
-   17         | . FLOAT
-   18         | . conditie LT conditie
-   19         | . conditie GT conditie
-   20         | . conditie LTE conditie
-   21         | . conditie GTE conditie
-   22         | . conditie EQ conditie
-   23         | . conditie NEQ conditie
-   24         | . conditie OR conditie
-   25         | . conditie AND conditie
-   26         | . '(' conditie ')'
-   67 control: WHILE '(' . conditie ')' '{' lista_instructiuni '}'
+   13 declaratie_struct: CONST TIP . ID
 
-    ID       shift, and go to state 75
-    INTEGER  shift, and go to state 76
-    STRING   shift, and go to state 77
-    BOOLEAN  shift, and go to state 78
-    FLOAT    shift, and go to state 79
-    '('      shift, and go to state 80
-
-    conditie  go to state 83
+    ID  shift, and go to state 78
 
 
 State 55
 
-   28 bloc_main: MAIN '{' lista_instructiuni '}' .
+   17 declaratie_struct: ARRAY LT . TIP ',' INTEGER GT ID
 
-    $default  reduce using rule 28 (bloc_main)
+    TIP  shift, and go to state 79
 
 
 State 56
 
-   36 lista_instructiuni: lista_instructiuni lista_statement .  [ID, IF, FOR, WHILE, '}']
-   38 lista_statement: lista_statement . statement ';'
-   39 statement: . ID ASSIGN ID
-   40          | . ID ASSIGN INTEGER
-   41          | . ID ASSIGN expresie
-   42          | . ID ASSIGN FLOAT
-   43          | . ID ASSIGN BOOLEAN
-   44          | . ID ASSIGN '"' STRING '"'
-   45          | . ID '.' ID ASSIGN ID '.' ID
-   46          | . ID '.' ID ASSIGN INTEGER
-   47          | . ID '.' ID ASSIGN FLOAT
-   48          | . ID '.' ID ASSIGN BOOLEAN
-   49          | . ID '.' ID ASSIGN '"' STRING '"'
-   50          | . ID '(' lista_apel ')'
-   51          | . ID '[' INTEGER ']' ASSIGN ID '[' INTEGER ']'
-   52          | . ID '[' INTEGER ']' ASSIGN INTEGER
-   53          | . ID '[' INTEGER ']' ASSIGN '"' STRING '"'
-   54          | . ID '[' INTEGER ']' ASSIGN FLOAT
-   55          | . ID '[' INTEGER ']' ASSIGN BOOLEAN
-   56          | . ID '[' INTEGER ']' ASSIGN expresie
+    4 declaratie: STRUCT ID '{' declaratii_struct '}' .
 
-    ID  shift, and go to state 32
-
-    ID        [reduce using rule 36 (lista_instructiuni)]
-    $default  reduce using rule 36 (lista_instructiuni)
-
-    statement  go to state 58
+    $default  reduce using rule 4 (declaratie)
 
 
 State 57
 
-   35 lista_instructiuni: lista_instructiuni lista_control .  [ID, IF, FOR, WHILE, '}']
-   64 control: . IF '(' conditie ')' '{' lista_instructiuni '}'
-   65        | . IF '(' conditie ')' ELSE '{' lista_instructiuni '}'
-   66        | . FOR '(' statement ';' conditie ';' statement ')' '{' lista_instructiuni '}'
-   67        | . WHILE '(' conditie ')' '{' lista_instructiuni '}'
-   69 lista_control: lista_control . control
+   11 declaratii_struct: declaratii_struct declaratie_struct . ';'
 
-    IF     shift, and go to state 33
-    FOR    shift, and go to state 34
-    WHILE  shift, and go to state 35
-
-    IF        [reduce using rule 35 (lista_instructiuni)]
-    FOR       [reduce using rule 35 (lista_instructiuni)]
-    WHILE     [reduce using rule 35 (lista_instructiuni)]
-    $default  reduce using rule 35 (lista_instructiuni)
-
-    control  go to state 60
+    ';'  shift, and go to state 80
 
 
 State 58
 
-   38 lista_statement: lista_statement statement . ';'
+   10 declaratii_struct: declaratie_struct ';' .
 
-    ';'  shift, and go to state 84
+    $default  reduce using rule 10 (declaratii_struct)
 
 
 State 59
 
-   37 lista_statement: statement ';' .
+    9 declaratie: ARRAY LT TIP ',' INTEGER . GT ID
 
-    $default  reduce using rule 37 (lista_statement)
+    GT  shift, and go to state 81
 
 
 State 60
 
-   69 lista_control: lista_control control .
+   63 statement: ID ASSIGN . ID
+   64          | ID ASSIGN . INTEGER
+   65          | ID ASSIGN . expresie
+   66          | ID ASSIGN . FLOAT
+   67          | ID ASSIGN . BOOLEAN
+   68          | ID ASSIGN . '"' STRING '"'
 
-    $default  reduce using rule 69 (lista_control)
+    ID       shift, and go to state 82
+    INTEGER  shift, and go to state 83
+    BOOLEAN  shift, and go to state 84
+    FLOAT    shift, and go to state 85
+    '('      shift, and go to state 86
+    '"'      shift, and go to state 87
+
+    expresie  go to state 88
 
 
 State 61
 
-   31 functie: FUNCTION TIP ID . '(' lista_param ')' bloc
+   80 statement: ID '(' . lista_apel ')'
 
-    '('  shift, and go to state 85
+    INTEGER  shift, and go to state 89
+
+    lista_apel  go to state 90
+    tipuri      go to state 91
 
 
 State 62
 
-   11 lista_param: lista_param ',' param .
+   69 statement: ID '.' . ID ASSIGN ID '.' ID
+   70          | ID '.' . ID ASSIGN INTEGER
+   71          | ID '.' . ID ASSIGN FLOAT
+   72          | ID '.' . ID ASSIGN BOOLEAN
+   73          | ID '.' . ID ASSIGN '"' STRING '"'
 
-    $default  reduce using rule 11 (lista_param)
+    ID  shift, and go to state 92
 
 
 State 63
 
-    9 declaratie: ARRAY LT TIP ',' INTEGER GT . ID
+   74 statement: ID '[' . INTEGER ']' ASSIGN ID '[' INTEGER ']'
+   75          | ID '[' . INTEGER ']' ASSIGN INTEGER
+   76          | ID '[' . INTEGER ']' ASSIGN '"' STRING '"'
+   77          | ID '[' . INTEGER ']' ASSIGN FLOAT
+   78          | ID '[' . INTEGER ']' ASSIGN BOOLEAN
+   79          | ID '[' . INTEGER ']' ASSIGN expresie
 
-    ID  shift, and go to state 86
+    INTEGER  shift, and go to state 93
 
 
 State 64
 
-   39 statement: ID ASSIGN ID .  [';', ')']
-   62 expresie: ID .  [PLUS, MINUS, MULT, SUBT, ';', ')']
+   88 control: IF '(' . conditie ')' '{' lista_instructiuni '}'
+   89        | IF '(' . conditie ')' ELSE '{' lista_instructiuni '}'
 
-    ';'       reduce using rule 39 (statement)
-    ';'       [reduce using rule 62 (expresie)]
-    ')'       reduce using rule 39 (statement)
-    ')'       [reduce using rule 62 (expresie)]
-    $default  reduce using rule 62 (expresie)
+    ID       shift, and go to state 94
+    INTEGER  shift, and go to state 95
+    STRING   shift, and go to state 96
+    BOOLEAN  shift, and go to state 97
+    FLOAT    shift, and go to state 98
+    '('      shift, and go to state 99
+
+    conditie  go to state 100
 
 
 State 65
 
-   40 statement: ID ASSIGN INTEGER .  [';', ')']
-   63 expresie: INTEGER .  [PLUS, MINUS, MULT, SUBT, ';', ')']
+   90 control: FOR '(' . statement ';' conditie ';' statement ')' '{' lista_instructiuni '}'
 
-    ';'       reduce using rule 40 (statement)
-    ';'       [reduce using rule 63 (expresie)]
-    ')'       reduce using rule 40 (statement)
-    ')'       [reduce using rule 63 (expresie)]
-    $default  reduce using rule 63 (expresie)
+    ID  shift, and go to state 37
+
+    statement  go to state 101
 
 
 State 66
 
-   43 statement: ID ASSIGN BOOLEAN .
+   91 control: WHILE '(' . conditie ')' '{' lista_instructiuni '}'
 
-    $default  reduce using rule 43 (statement)
+    ID       shift, and go to state 94
+    INTEGER  shift, and go to state 95
+    STRING   shift, and go to state 96
+    BOOLEAN  shift, and go to state 97
+    FLOAT    shift, and go to state 98
+    '('      shift, and go to state 99
+
+    conditie  go to state 102
 
 
 State 67
 
-   42 statement: ID ASSIGN FLOAT .
+   43 bloc_main: MAIN '{' lista_instructiuni_main '}' .
 
-    $default  reduce using rule 42 (statement)
+    $default  reduce using rule 43 (bloc_main)
 
 
 State 68
 
-   57 expresie: . expresie PLUS expresie
-   58         | . expresie MINUS expresie
-   59         | . expresie MULT expresie
-   60         | . expresie SUBT expresie
-   61         | . '(' expresie ')'
-   61         | '(' . expresie ')'
-   62         | . ID
-   63         | . INTEGER
+    3 declaratii: declaratii . declaratie ';'
+   60 lista_instructiuni_main: lista_instructiuni_main declaratii .
 
-    ID       shift, and go to state 87
-    INTEGER  shift, and go to state 88
-    '('      shift, and go to state 68
+    TIP     shift, and go to state 1
+    STRUCT  shift, and go to state 2
+    CONST   shift, and go to state 3
+    ARRAY   shift, and go to state 4
 
-    expresie  go to state 89
+    TIP       [reduce using rule 60 (lista_instructiuni_main)]
+    STRUCT    [reduce using rule 60 (lista_instructiuni_main)]
+    CONST     [reduce using rule 60 (lista_instructiuni_main)]
+    ARRAY     [reduce using rule 60 (lista_instructiuni_main)]
+    $default  reduce using rule 60 (lista_instructiuni_main)
+
+    declaratie  go to state 14
 
 
 State 69
 
-   44 statement: ID ASSIGN '"' . STRING '"'
+   59 lista_instructiuni_main: lista_instructiuni_main lista_statement .
+   62 lista_statement: lista_statement . statement ';'
 
-    STRING  shift, and go to state 90
+    ID  shift, and go to state 37
+
+    ID        [reduce using rule 59 (lista_instructiuni_main)]
+    $default  reduce using rule 59 (lista_instructiuni_main)
+
+    statement  go to state 71
 
 
 State 70
 
-   41 statement: ID ASSIGN expresie .  [';', ')']
-   57 expresie: expresie . PLUS expresie
-   58         | expresie . MINUS expresie
-   59         | expresie . MULT expresie
-   60         | expresie . SUBT expresie
+   58 lista_instructiuni_main: lista_instructiuni_main lista_control .
+   93 lista_control: lista_control . control
 
-    PLUS   shift, and go to state 91
-    MINUS  shift, and go to state 92
-    MULT   shift, and go to state 93
-    SUBT   shift, and go to state 94
+    IF     shift, and go to state 38
+    FOR    shift, and go to state 39
+    WHILE  shift, and go to state 40
 
-    $default  reduce using rule 41 (statement)
+    IF        [reduce using rule 58 (lista_instructiuni_main)]
+    FOR       [reduce using rule 58 (lista_instructiuni_main)]
+    WHILE     [reduce using rule 58 (lista_instructiuni_main)]
+    $default  reduce using rule 58 (lista_instructiuni_main)
+
+    control  go to state 73
 
 
 State 71
 
-   70 lista_apel: INTEGER .
+   62 lista_statement: lista_statement statement . ';'
 
-    $default  reduce using rule 70 (lista_apel)
+    ';'  shift, and go to state 103
 
 
 State 72
 
-   50 statement: ID '(' lista_apel . ')'
-   71 lista_apel: lista_apel . ',' INTEGER
+   61 lista_statement: statement ';' .
 
-    ')'  shift, and go to state 95
-    ','  shift, and go to state 96
+    $default  reduce using rule 61 (lista_statement)
 
 
 State 73
 
-   45 statement: ID '.' ID . ASSIGN ID '.' ID
-   46          | ID '.' ID . ASSIGN INTEGER
-   47          | ID '.' ID . ASSIGN FLOAT
-   48          | ID '.' ID . ASSIGN BOOLEAN
-   49          | ID '.' ID . ASSIGN '"' STRING '"'
+   93 lista_control: lista_control control .
 
-    ASSIGN  shift, and go to state 97
+    $default  reduce using rule 93 (lista_control)
 
 
 State 74
 
-   51 statement: ID '[' INTEGER . ']' ASSIGN ID '[' INTEGER ']'
-   52          | ID '[' INTEGER . ']' ASSIGN INTEGER
-   53          | ID '[' INTEGER . ']' ASSIGN '"' STRING '"'
-   54          | ID '[' INTEGER . ']' ASSIGN FLOAT
-   55          | ID '[' INTEGER . ']' ASSIGN BOOLEAN
-   56          | ID '[' INTEGER . ']' ASSIGN expresie
+   46 functie: FUNCTION TIP ID . '(' lista_param_functii_definite ')' bloc_functie
 
-    ']'  shift, and go to state 98
+    '('  shift, and go to state 104
 
 
 State 75
 
-   13 conditie: ID .
+   19 lista_param: lista_param ',' param .
 
-    $default  reduce using rule 13 (conditie)
+    $default  reduce using rule 19 (lista_param)
 
 
 State 76
 
-   15 conditie: INTEGER .
+   15 declaratie_struct: TIP ID '(' . lista_param ')'
+   16                  | TIP ID '(' . ')'
 
-    $default  reduce using rule 15 (conditie)
+    TIP  shift, and go to state 26
+    ')'  shift, and go to state 105
+
+    lista_param  go to state 106
+    param        go to state 29
 
 
 State 77
 
-   14 conditie: STRING .
+   14 declaratie_struct: STRUCT ID '{' . declaratii_struct '}'
 
-    $default  reduce using rule 14 (conditie)
+    TIP     shift, and go to state 30
+    STRUCT  shift, and go to state 31
+    CONST   shift, and go to state 32
+    ARRAY   shift, and go to state 33
+
+    declaratii_struct  go to state 107
+    declaratie_struct  go to state 35
 
 
 State 78
 
-   16 conditie: BOOLEAN .
+   13 declaratie_struct: CONST TIP ID .
 
-    $default  reduce using rule 16 (conditie)
+    $default  reduce using rule 13 (declaratie_struct)
 
 
 State 79
 
-   17 conditie: FLOAT .
+   17 declaratie_struct: ARRAY LT TIP . ',' INTEGER GT ID
 
-    $default  reduce using rule 17 (conditie)
+    ','  shift, and go to state 108
 
 
 State 80
 
-   13 conditie: . ID
-   14         | . STRING
-   15         | . INTEGER
-   16         | . BOOLEAN
-   17         | . FLOAT
-   18         | . conditie LT conditie
-   19         | . conditie GT conditie
-   20         | . conditie LTE conditie
-   21         | . conditie GTE conditie
-   22         | . conditie EQ conditie
-   23         | . conditie NEQ conditie
-   24         | . conditie OR conditie
-   25         | . conditie AND conditie
-   26         | . '(' conditie ')'
-   26         | '(' . conditie ')'
+   11 declaratii_struct: declaratii_struct declaratie_struct ';' .
 
-    ID       shift, and go to state 75
-    INTEGER  shift, and go to state 76
-    STRING   shift, and go to state 77
-    BOOLEAN  shift, and go to state 78
-    FLOAT    shift, and go to state 79
-    '('      shift, and go to state 80
-
-    conditie  go to state 99
+    $default  reduce using rule 11 (declaratii_struct)
 
 
 State 81
 
-   18 conditie: conditie . LT conditie
-   19         | conditie . GT conditie
-   20         | conditie . LTE conditie
-   21         | conditie . GTE conditie
-   22         | conditie . EQ conditie
-   23         | conditie . NEQ conditie
-   24         | conditie . OR conditie
-   25         | conditie . AND conditie
-   64 control: IF '(' conditie . ')' '{' lista_instructiuni '}'
-   65        | IF '(' conditie . ')' ELSE '{' lista_instructiuni '}'
+    9 declaratie: ARRAY LT TIP ',' INTEGER GT . ID
 
-    AND  shift, and go to state 100
-    OR   shift, and go to state 101
-    LT   shift, and go to state 102
-    GT   shift, and go to state 103
-    LTE  shift, and go to state 104
-    GTE  shift, and go to state 105
-    EQ   shift, and go to state 106
-    NEQ  shift, and go to state 107
-    ')'  shift, and go to state 108
+    ID  shift, and go to state 109
 
 
 State 82
 
-   66 control: FOR '(' statement . ';' conditie ';' statement ')' '{' lista_instructiuni '}'
+   63 statement: ID ASSIGN ID .
+   86 expresie: ID .
 
-    ';'  shift, and go to state 109
+    ';'       reduce using rule 63 (statement)
+    ';'       [reduce using rule 86 (expresie)]
+    ')'       reduce using rule 63 (statement)
+    ')'       [reduce using rule 86 (expresie)]
+    $default  reduce using rule 86 (expresie)
 
 
 State 83
 
-   18 conditie: conditie . LT conditie
-   19         | conditie . GT conditie
-   20         | conditie . LTE conditie
-   21         | conditie . GTE conditie
-   22         | conditie . EQ conditie
-   23         | conditie . NEQ conditie
-   24         | conditie . OR conditie
-   25         | conditie . AND conditie
-   67 control: WHILE '(' conditie . ')' '{' lista_instructiuni '}'
+   64 statement: ID ASSIGN INTEGER .
+   87 expresie: INTEGER .
 
-    AND  shift, and go to state 100
-    OR   shift, and go to state 101
-    LT   shift, and go to state 102
-    GT   shift, and go to state 103
-    LTE  shift, and go to state 104
-    GTE  shift, and go to state 105
-    EQ   shift, and go to state 106
-    NEQ  shift, and go to state 107
-    ')'  shift, and go to state 110
+    ';'       reduce using rule 64 (statement)
+    ';'       [reduce using rule 87 (expresie)]
+    ')'       reduce using rule 64 (statement)
+    ')'       [reduce using rule 87 (expresie)]
+    $default  reduce using rule 87 (expresie)
 
 
 State 84
 
-   38 lista_statement: lista_statement statement ';' .
+   67 statement: ID ASSIGN BOOLEAN .
 
-    $default  reduce using rule 38 (lista_statement)
+    $default  reduce using rule 67 (statement)
 
 
 State 85
 
-   10 lista_param: . param
-   11            | . lista_param ',' param
-   12 param: . TIP ID
-   31 functie: FUNCTION TIP ID '(' . lista_param ')' bloc
+   66 statement: ID ASSIGN FLOAT .
 
-    TIP  shift, and go to state 26
-
-    lista_param  go to state 111
-    param        go to state 29
+    $default  reduce using rule 66 (statement)
 
 
 State 86
+
+   85 expresie: '(' . expresie ')'
+
+    ID       shift, and go to state 110
+    INTEGER  shift, and go to state 111
+    '('      shift, and go to state 86
+
+    expresie  go to state 112
+
+
+State 87
+
+   68 statement: ID ASSIGN '"' . STRING '"'
+
+    STRING  shift, and go to state 113
+
+
+State 88
+
+   65 statement: ID ASSIGN expresie .
+   81 expresie: expresie . PLUS expresie
+   82         | expresie . MINUS expresie
+   83         | expresie . MULT expresie
+   84         | expresie . SUBT expresie
+
+    PLUS   shift, and go to state 114
+    MINUS  shift, and go to state 115
+    MULT   shift, and go to state 116
+    SUBT   shift, and go to state 117
+
+    $default  reduce using rule 65 (statement)
+
+
+State 89
+
+   96 tipuri: INTEGER .
+
+    $default  reduce using rule 96 (tipuri)
+
+
+State 90
+
+   80 statement: ID '(' lista_apel . ')'
+   95 lista_apel: lista_apel . ',' tipuri
+
+    ')'  shift, and go to state 118
+    ','  shift, and go to state 119
+
+
+State 91
+
+   94 lista_apel: tipuri .
+
+    $default  reduce using rule 94 (lista_apel)
+
+
+State 92
+
+   69 statement: ID '.' ID . ASSIGN ID '.' ID
+   70          | ID '.' ID . ASSIGN INTEGER
+   71          | ID '.' ID . ASSIGN FLOAT
+   72          | ID '.' ID . ASSIGN BOOLEAN
+   73          | ID '.' ID . ASSIGN '"' STRING '"'
+
+    ASSIGN  shift, and go to state 120
+
+
+State 93
+
+   74 statement: ID '[' INTEGER . ']' ASSIGN ID '[' INTEGER ']'
+   75          | ID '[' INTEGER . ']' ASSIGN INTEGER
+   76          | ID '[' INTEGER . ']' ASSIGN '"' STRING '"'
+   77          | ID '[' INTEGER . ']' ASSIGN FLOAT
+   78          | ID '[' INTEGER . ']' ASSIGN BOOLEAN
+   79          | ID '[' INTEGER . ']' ASSIGN expresie
+
+    ']'  shift, and go to state 121
+
+
+State 94
+
+   29 conditie: ID .
+
+    $default  reduce using rule 29 (conditie)
+
+
+State 95
+
+   31 conditie: INTEGER .
+
+    $default  reduce using rule 31 (conditie)
+
+
+State 96
+
+   30 conditie: STRING .
+
+    $default  reduce using rule 30 (conditie)
+
+
+State 97
+
+   32 conditie: BOOLEAN .
+
+    $default  reduce using rule 32 (conditie)
+
+
+State 98
+
+   33 conditie: FLOAT .
+
+    $default  reduce using rule 33 (conditie)
+
+
+State 99
+
+   42 conditie: '(' . conditie ')'
+
+    ID       shift, and go to state 94
+    INTEGER  shift, and go to state 95
+    STRING   shift, and go to state 96
+    BOOLEAN  shift, and go to state 97
+    FLOAT    shift, and go to state 98
+    '('      shift, and go to state 99
+
+    conditie  go to state 122
+
+
+State 100
+
+   34 conditie: conditie . LT conditie
+   35         | conditie . GT conditie
+   36         | conditie . LTE conditie
+   37         | conditie . GTE conditie
+   38         | conditie . EQ conditie
+   39         | conditie . NEQ conditie
+   40         | conditie . OR conditie
+   41         | conditie . AND conditie
+   88 control: IF '(' conditie . ')' '{' lista_instructiuni '}'
+   89        | IF '(' conditie . ')' ELSE '{' lista_instructiuni '}'
+
+    AND  shift, and go to state 123
+    OR   shift, and go to state 124
+    LT   shift, and go to state 125
+    GT   shift, and go to state 126
+    LTE  shift, and go to state 127
+    GTE  shift, and go to state 128
+    EQ   shift, and go to state 129
+    NEQ  shift, and go to state 130
+    ')'  shift, and go to state 131
+
+
+State 101
+
+   90 control: FOR '(' statement . ';' conditie ';' statement ')' '{' lista_instructiuni '}'
+
+    ';'  shift, and go to state 132
+
+
+State 102
+
+   34 conditie: conditie . LT conditie
+   35         | conditie . GT conditie
+   36         | conditie . LTE conditie
+   37         | conditie . GTE conditie
+   38         | conditie . EQ conditie
+   39         | conditie . NEQ conditie
+   40         | conditie . OR conditie
+   41         | conditie . AND conditie
+   91 control: WHILE '(' conditie . ')' '{' lista_instructiuni '}'
+
+    AND  shift, and go to state 123
+    OR   shift, and go to state 124
+    LT   shift, and go to state 125
+    GT   shift, and go to state 126
+    LTE  shift, and go to state 127
+    GTE  shift, and go to state 128
+    EQ   shift, and go to state 129
+    NEQ  shift, and go to state 130
+    ')'  shift, and go to state 133
+
+
+State 103
+
+   62 lista_statement: lista_statement statement ';' .
+
+    $default  reduce using rule 62 (lista_statement)
+
+
+State 104
+
+   46 functie: FUNCTION TIP ID '(' . lista_param_functii_definite ')' bloc_functie
+
+    TIP  shift, and go to state 134
+
+    lista_param_functii_definite  go to state 135
+    param_fd                      go to state 136
+
+
+State 105
+
+   16 declaratie_struct: TIP ID '(' ')' .
+
+    $default  reduce using rule 16 (declaratie_struct)
+
+
+State 106
+
+   15 declaratie_struct: TIP ID '(' lista_param . ')'
+   19 lista_param: lista_param . ',' param
+
+    ')'  shift, and go to state 137
+    ','  shift, and go to state 51
+
+
+State 107
+
+   11 declaratii_struct: declaratii_struct . declaratie_struct ';'
+   14 declaratie_struct: STRUCT ID '{' declaratii_struct . '}'
+
+    TIP     shift, and go to state 30
+    STRUCT  shift, and go to state 31
+    CONST   shift, and go to state 32
+    ARRAY   shift, and go to state 33
+    '}'     shift, and go to state 138
+
+    declaratie_struct  go to state 57
+
+
+State 108
+
+   17 declaratie_struct: ARRAY LT TIP ',' . INTEGER GT ID
+
+    INTEGER  shift, and go to state 139
+
+
+State 109
 
     9 declaratie: ARRAY LT TIP ',' INTEGER GT ID .
 
     $default  reduce using rule 9 (declaratie)
 
 
-State 87
-
-   62 expresie: ID .
-
-    $default  reduce using rule 62 (expresie)
-
-
-State 88
-
-   63 expresie: INTEGER .
-
-    $default  reduce using rule 63 (expresie)
-
-
-State 89
-
-   57 expresie: expresie . PLUS expresie
-   58         | expresie . MINUS expresie
-   59         | expresie . MULT expresie
-   60         | expresie . SUBT expresie
-   61         | '(' expresie . ')'
-
-    PLUS   shift, and go to state 91
-    MINUS  shift, and go to state 92
-    MULT   shift, and go to state 93
-    SUBT   shift, and go to state 94
-    ')'    shift, and go to state 112
-
-
-State 90
-
-   44 statement: ID ASSIGN '"' STRING . '"'
-
-    '"'  shift, and go to state 113
-
-
-State 91
-
-   57 expresie: . expresie PLUS expresie
-   57         | expresie PLUS . expresie
-   58         | . expresie MINUS expresie
-   59         | . expresie MULT expresie
-   60         | . expresie SUBT expresie
-   61         | . '(' expresie ')'
-   62         | . ID
-   63         | . INTEGER
-
-    ID       shift, and go to state 87
-    INTEGER  shift, and go to state 88
-    '('      shift, and go to state 68
-
-    expresie  go to state 114
-
-
-State 92
-
-   57 expresie: . expresie PLUS expresie
-   58         | . expresie MINUS expresie
-   58         | expresie MINUS . expresie
-   59         | . expresie MULT expresie
-   60         | . expresie SUBT expresie
-   61         | . '(' expresie ')'
-   62         | . ID
-   63         | . INTEGER
-
-    ID       shift, and go to state 87
-    INTEGER  shift, and go to state 88
-    '('      shift, and go to state 68
-
-    expresie  go to state 115
-
-
-State 93
-
-   57 expresie: . expresie PLUS expresie
-   58         | . expresie MINUS expresie
-   59         | . expresie MULT expresie
-   59         | expresie MULT . expresie
-   60         | . expresie SUBT expresie
-   61         | . '(' expresie ')'
-   62         | . ID
-   63         | . INTEGER
-
-    ID       shift, and go to state 87
-    INTEGER  shift, and go to state 88
-    '('      shift, and go to state 68
-
-    expresie  go to state 116
-
-
-State 94
-
-   57 expresie: . expresie PLUS expresie
-   58         | . expresie MINUS expresie
-   59         | . expresie MULT expresie
-   60         | . expresie SUBT expresie
-   60         | expresie SUBT . expresie
-   61         | . '(' expresie ')'
-   62         | . ID
-   63         | . INTEGER
-
-    ID       shift, and go to state 87
-    INTEGER  shift, and go to state 88
-    '('      shift, and go to state 68
-
-    expresie  go to state 117
-
-
-State 95
-
-   50 statement: ID '(' lista_apel ')' .
-
-    $default  reduce using rule 50 (statement)
-
-
-State 96
-
-   71 lista_apel: lista_apel ',' . INTEGER
-
-    INTEGER  shift, and go to state 118
-
-
-State 97
-
-   45 statement: ID '.' ID ASSIGN . ID '.' ID
-   46          | ID '.' ID ASSIGN . INTEGER
-   47          | ID '.' ID ASSIGN . FLOAT
-   48          | ID '.' ID ASSIGN . BOOLEAN
-   49          | ID '.' ID ASSIGN . '"' STRING '"'
-
-    ID       shift, and go to state 119
-    INTEGER  shift, and go to state 120
-    BOOLEAN  shift, and go to state 121
-    FLOAT    shift, and go to state 122
-    '"'      shift, and go to state 123
-
-
-State 98
-
-   51 statement: ID '[' INTEGER ']' . ASSIGN ID '[' INTEGER ']'
-   52          | ID '[' INTEGER ']' . ASSIGN INTEGER
-   53          | ID '[' INTEGER ']' . ASSIGN '"' STRING '"'
-   54          | ID '[' INTEGER ']' . ASSIGN FLOAT
-   55          | ID '[' INTEGER ']' . ASSIGN BOOLEAN
-   56          | ID '[' INTEGER ']' . ASSIGN expresie
-
-    ASSIGN  shift, and go to state 124
-
-
-State 99
-
-   18 conditie: conditie . LT conditie
-   19         | conditie . GT conditie
-   20         | conditie . LTE conditie
-   21         | conditie . GTE conditie
-   22         | conditie . EQ conditie
-   23         | conditie . NEQ conditie
-   24         | conditie . OR conditie
-   25         | conditie . AND conditie
-   26         | '(' conditie . ')'
-
-    AND  shift, and go to state 100
-    OR   shift, and go to state 101
-    LT   shift, and go to state 102
-    GT   shift, and go to state 103
-    LTE  shift, and go to state 104
-    GTE  shift, and go to state 105
-    EQ   shift, and go to state 106
-    NEQ  shift, and go to state 107
-    ')'  shift, and go to state 125
-
-
-State 100
-
-   13 conditie: . ID
-   14         | . STRING
-   15         | . INTEGER
-   16         | . BOOLEAN
-   17         | . FLOAT
-   18         | . conditie LT conditie
-   19         | . conditie GT conditie
-   20         | . conditie LTE conditie
-   21         | . conditie GTE conditie
-   22         | . conditie EQ conditie
-   23         | . conditie NEQ conditie
-   24         | . conditie OR conditie
-   25         | . conditie AND conditie
-   25         | conditie AND . conditie
-   26         | . '(' conditie ')'
-
-    ID       shift, and go to state 75
-    INTEGER  shift, and go to state 76
-    STRING   shift, and go to state 77
-    BOOLEAN  shift, and go to state 78
-    FLOAT    shift, and go to state 79
-    '('      shift, and go to state 80
-
-    conditie  go to state 126
-
-
-State 101
-
-   13 conditie: . ID
-   14         | . STRING
-   15         | . INTEGER
-   16         | . BOOLEAN
-   17         | . FLOAT
-   18         | . conditie LT conditie
-   19         | . conditie GT conditie
-   20         | . conditie LTE conditie
-   21         | . conditie GTE conditie
-   22         | . conditie EQ conditie
-   23         | . conditie NEQ conditie
-   24         | . conditie OR conditie
-   24         | conditie OR . conditie
-   25         | . conditie AND conditie
-   26         | . '(' conditie ')'
-
-    ID       shift, and go to state 75
-    INTEGER  shift, and go to state 76
-    STRING   shift, and go to state 77
-    BOOLEAN  shift, and go to state 78
-    FLOAT    shift, and go to state 79
-    '('      shift, and go to state 80
-
-    conditie  go to state 127
-
-
-State 102
-
-   13 conditie: . ID
-   14         | . STRING
-   15         | . INTEGER
-   16         | . BOOLEAN
-   17         | . FLOAT
-   18         | . conditie LT conditie
-   18         | conditie LT . conditie
-   19         | . conditie GT conditie
-   20         | . conditie LTE conditie
-   21         | . conditie GTE conditie
-   22         | . conditie EQ conditie
-   23         | . conditie NEQ conditie
-   24         | . conditie OR conditie
-   25         | . conditie AND conditie
-   26         | . '(' conditie ')'
-
-    ID       shift, and go to state 75
-    INTEGER  shift, and go to state 76
-    STRING   shift, and go to state 77
-    BOOLEAN  shift, and go to state 78
-    FLOAT    shift, and go to state 79
-    '('      shift, and go to state 80
-
-    conditie  go to state 128
-
-
-State 103
-
-   13 conditie: . ID
-   14         | . STRING
-   15         | . INTEGER
-   16         | . BOOLEAN
-   17         | . FLOAT
-   18         | . conditie LT conditie
-   19         | . conditie GT conditie
-   19         | conditie GT . conditie
-   20         | . conditie LTE conditie
-   21         | . conditie GTE conditie
-   22         | . conditie EQ conditie
-   23         | . conditie NEQ conditie
-   24         | . conditie OR conditie
-   25         | . conditie AND conditie
-   26         | . '(' conditie ')'
-
-    ID       shift, and go to state 75
-    INTEGER  shift, and go to state 76
-    STRING   shift, and go to state 77
-    BOOLEAN  shift, and go to state 78
-    FLOAT    shift, and go to state 79
-    '('      shift, and go to state 80
-
-    conditie  go to state 129
-
-
-State 104
-
-   13 conditie: . ID
-   14         | . STRING
-   15         | . INTEGER
-   16         | . BOOLEAN
-   17         | . FLOAT
-   18         | . conditie LT conditie
-   19         | . conditie GT conditie
-   20         | . conditie LTE conditie
-   20         | conditie LTE . conditie
-   21         | . conditie GTE conditie
-   22         | . conditie EQ conditie
-   23         | . conditie NEQ conditie
-   24         | . conditie OR conditie
-   25         | . conditie AND conditie
-   26         | . '(' conditie ')'
-
-    ID       shift, and go to state 75
-    INTEGER  shift, and go to state 76
-    STRING   shift, and go to state 77
-    BOOLEAN  shift, and go to state 78
-    FLOAT    shift, and go to state 79
-    '('      shift, and go to state 80
-
-    conditie  go to state 130
-
-
-State 105
-
-   13 conditie: . ID
-   14         | . STRING
-   15         | . INTEGER
-   16         | . BOOLEAN
-   17         | . FLOAT
-   18         | . conditie LT conditie
-   19         | . conditie GT conditie
-   20         | . conditie LTE conditie
-   21         | . conditie GTE conditie
-   21         | conditie GTE . conditie
-   22         | . conditie EQ conditie
-   23         | . conditie NEQ conditie
-   24         | . conditie OR conditie
-   25         | . conditie AND conditie
-   26         | . '(' conditie ')'
-
-    ID       shift, and go to state 75
-    INTEGER  shift, and go to state 76
-    STRING   shift, and go to state 77
-    BOOLEAN  shift, and go to state 78
-    FLOAT    shift, and go to state 79
-    '('      shift, and go to state 80
-
-    conditie  go to state 131
-
-
-State 106
-
-   13 conditie: . ID
-   14         | . STRING
-   15         | . INTEGER
-   16         | . BOOLEAN
-   17         | . FLOAT
-   18         | . conditie LT conditie
-   19         | . conditie GT conditie
-   20         | . conditie LTE conditie
-   21         | . conditie GTE conditie
-   22         | . conditie EQ conditie
-   22         | conditie EQ . conditie
-   23         | . conditie NEQ conditie
-   24         | . conditie OR conditie
-   25         | . conditie AND conditie
-   26         | . '(' conditie ')'
-
-    ID       shift, and go to state 75
-    INTEGER  shift, and go to state 76
-    STRING   shift, and go to state 77
-    BOOLEAN  shift, and go to state 78
-    FLOAT    shift, and go to state 79
-    '('      shift, and go to state 80
-
-    conditie  go to state 132
-
-
-State 107
-
-   13 conditie: . ID
-   14         | . STRING
-   15         | . INTEGER
-   16         | . BOOLEAN
-   17         | . FLOAT
-   18         | . conditie LT conditie
-   19         | . conditie GT conditie
-   20         | . conditie LTE conditie
-   21         | . conditie GTE conditie
-   22         | . conditie EQ conditie
-   23         | . conditie NEQ conditie
-   23         | conditie NEQ . conditie
-   24         | . conditie OR conditie
-   25         | . conditie AND conditie
-   26         | . '(' conditie ')'
-
-    ID       shift, and go to state 75
-    INTEGER  shift, and go to state 76
-    STRING   shift, and go to state 77
-    BOOLEAN  shift, and go to state 78
-    FLOAT    shift, and go to state 79
-    '('      shift, and go to state 80
-
-    conditie  go to state 133
-
-
-State 108
-
-   64 control: IF '(' conditie ')' . '{' lista_instructiuni '}'
-   65        | IF '(' conditie ')' . ELSE '{' lista_instructiuni '}'
-
-    ELSE  shift, and go to state 134
-    '{'   shift, and go to state 135
-
-
-State 109
-
-   13 conditie: . ID
-   14         | . STRING
-   15         | . INTEGER
-   16         | . BOOLEAN
-   17         | . FLOAT
-   18         | . conditie LT conditie
-   19         | . conditie GT conditie
-   20         | . conditie LTE conditie
-   21         | . conditie GTE conditie
-   22         | . conditie EQ conditie
-   23         | . conditie NEQ conditie
-   24         | . conditie OR conditie
-   25         | . conditie AND conditie
-   26         | . '(' conditie ')'
-   66 control: FOR '(' statement ';' . conditie ';' statement ')' '{' lista_instructiuni '}'
-
-    ID       shift, and go to state 75
-    INTEGER  shift, and go to state 76
-    STRING   shift, and go to state 77
-    BOOLEAN  shift, and go to state 78
-    FLOAT    shift, and go to state 79
-    '('      shift, and go to state 80
-
-    conditie  go to state 136
-
-
 State 110
 
-   67 control: WHILE '(' conditie ')' . '{' lista_instructiuni '}'
+   86 expresie: ID .
 
-    '{'  shift, and go to state 137
+    $default  reduce using rule 86 (expresie)
 
 
 State 111
 
-   11 lista_param: lista_param . ',' param
-   31 functie: FUNCTION TIP ID '(' lista_param . ')' bloc
+   87 expresie: INTEGER .
 
-    ')'  shift, and go to state 138
-    ','  shift, and go to state 45
+    $default  reduce using rule 87 (expresie)
 
 
 State 112
 
-   61 expresie: '(' expresie ')' .
+   81 expresie: expresie . PLUS expresie
+   82         | expresie . MINUS expresie
+   83         | expresie . MULT expresie
+   84         | expresie . SUBT expresie
+   85         | '(' expresie . ')'
 
-    $default  reduce using rule 61 (expresie)
+    PLUS   shift, and go to state 114
+    MINUS  shift, and go to state 115
+    MULT   shift, and go to state 116
+    SUBT   shift, and go to state 117
+    ')'    shift, and go to state 140
 
 
 State 113
 
-   44 statement: ID ASSIGN '"' STRING '"' .
+   68 statement: ID ASSIGN '"' STRING . '"'
 
-    $default  reduce using rule 44 (statement)
+    '"'  shift, and go to state 141
 
 
 State 114
 
-   57 expresie: expresie . PLUS expresie
-   57         | expresie PLUS expresie .  [PLUS, ';', ')']
-   58         | expresie . MINUS expresie
-   59         | expresie . MULT expresie
-   60         | expresie . SUBT expresie
+   81 expresie: expresie PLUS . expresie
 
-    MINUS  shift, and go to state 92
-    MULT   shift, and go to state 93
-    SUBT   shift, and go to state 94
+    ID       shift, and go to state 110
+    INTEGER  shift, and go to state 111
+    '('      shift, and go to state 86
 
-    $default  reduce using rule 57 (expresie)
-
-    Conflict between rule 57 and token PLUS resolved as reduce (%left PLUS).
-    Conflict between rule 57 and token MINUS resolved as shift (PLUS < MINUS).
-    Conflict between rule 57 and token MULT resolved as shift (PLUS < MULT).
-    Conflict between rule 57 and token SUBT resolved as shift (PLUS < SUBT).
+    expresie  go to state 142
 
 
 State 115
 
-   57 expresie: expresie . PLUS expresie
-   58         | expresie . MINUS expresie
-   58         | expresie MINUS expresie .  [PLUS, MINUS, ';', ')']
-   59         | expresie . MULT expresie
-   60         | expresie . SUBT expresie
+   82 expresie: expresie MINUS . expresie
 
-    MULT  shift, and go to state 93
-    SUBT  shift, and go to state 94
+    ID       shift, and go to state 110
+    INTEGER  shift, and go to state 111
+    '('      shift, and go to state 86
 
-    $default  reduce using rule 58 (expresie)
-
-    Conflict between rule 58 and token PLUS resolved as reduce (PLUS < MINUS).
-    Conflict between rule 58 and token MINUS resolved as reduce (%left MINUS).
-    Conflict between rule 58 and token MULT resolved as shift (MINUS < MULT).
-    Conflict between rule 58 and token SUBT resolved as shift (MINUS < SUBT).
+    expresie  go to state 143
 
 
 State 116
 
-   57 expresie: expresie . PLUS expresie
-   58         | expresie . MINUS expresie
-   59         | expresie . MULT expresie
-   59         | expresie MULT expresie .  [PLUS, MINUS, MULT, ';', ')']
-   60         | expresie . SUBT expresie
+   83 expresie: expresie MULT . expresie
 
-    SUBT  shift, and go to state 94
+    ID       shift, and go to state 110
+    INTEGER  shift, and go to state 111
+    '('      shift, and go to state 86
 
-    $default  reduce using rule 59 (expresie)
-
-    Conflict between rule 59 and token PLUS resolved as reduce (PLUS < MULT).
-    Conflict between rule 59 and token MINUS resolved as reduce (MINUS < MULT).
-    Conflict between rule 59 and token MULT resolved as reduce (%left MULT).
-    Conflict between rule 59 and token SUBT resolved as shift (MULT < SUBT).
+    expresie  go to state 144
 
 
 State 117
 
-   57 expresie: expresie . PLUS expresie
-   58         | expresie . MINUS expresie
-   59         | expresie . MULT expresie
-   60         | expresie . SUBT expresie
-   60         | expresie SUBT expresie .  [PLUS, MINUS, MULT, SUBT, ';', ')']
+   84 expresie: expresie SUBT . expresie
 
-    $default  reduce using rule 60 (expresie)
+    ID       shift, and go to state 110
+    INTEGER  shift, and go to state 111
+    '('      shift, and go to state 86
 
-    Conflict between rule 60 and token PLUS resolved as reduce (PLUS < SUBT).
-    Conflict between rule 60 and token MINUS resolved as reduce (MINUS < SUBT).
-    Conflict between rule 60 and token MULT resolved as reduce (MULT < SUBT).
-    Conflict between rule 60 and token SUBT resolved as reduce (%left SUBT).
+    expresie  go to state 145
 
 
 State 118
 
-   71 lista_apel: lista_apel ',' INTEGER .
+   80 statement: ID '(' lista_apel ')' .
 
-    $default  reduce using rule 71 (lista_apel)
+    $default  reduce using rule 80 (statement)
 
 
 State 119
 
-   45 statement: ID '.' ID ASSIGN ID . '.' ID
+   95 lista_apel: lista_apel ',' . tipuri
 
-    '.'  shift, and go to state 139
+    INTEGER  shift, and go to state 89
+
+    tipuri  go to state 146
 
 
 State 120
 
-   46 statement: ID '.' ID ASSIGN INTEGER .
+   69 statement: ID '.' ID ASSIGN . ID '.' ID
+   70          | ID '.' ID ASSIGN . INTEGER
+   71          | ID '.' ID ASSIGN . FLOAT
+   72          | ID '.' ID ASSIGN . BOOLEAN
+   73          | ID '.' ID ASSIGN . '"' STRING '"'
 
-    $default  reduce using rule 46 (statement)
+    ID       shift, and go to state 147
+    INTEGER  shift, and go to state 148
+    BOOLEAN  shift, and go to state 149
+    FLOAT    shift, and go to state 150
+    '"'      shift, and go to state 151
 
 
 State 121
 
-   48 statement: ID '.' ID ASSIGN BOOLEAN .
+   74 statement: ID '[' INTEGER ']' . ASSIGN ID '[' INTEGER ']'
+   75          | ID '[' INTEGER ']' . ASSIGN INTEGER
+   76          | ID '[' INTEGER ']' . ASSIGN '"' STRING '"'
+   77          | ID '[' INTEGER ']' . ASSIGN FLOAT
+   78          | ID '[' INTEGER ']' . ASSIGN BOOLEAN
+   79          | ID '[' INTEGER ']' . ASSIGN expresie
 
-    $default  reduce using rule 48 (statement)
+    ASSIGN  shift, and go to state 152
 
 
 State 122
 
-   47 statement: ID '.' ID ASSIGN FLOAT .
+   34 conditie: conditie . LT conditie
+   35         | conditie . GT conditie
+   36         | conditie . LTE conditie
+   37         | conditie . GTE conditie
+   38         | conditie . EQ conditie
+   39         | conditie . NEQ conditie
+   40         | conditie . OR conditie
+   41         | conditie . AND conditie
+   42         | '(' conditie . ')'
 
-    $default  reduce using rule 47 (statement)
+    AND  shift, and go to state 123
+    OR   shift, and go to state 124
+    LT   shift, and go to state 125
+    GT   shift, and go to state 126
+    LTE  shift, and go to state 127
+    GTE  shift, and go to state 128
+    EQ   shift, and go to state 129
+    NEQ  shift, and go to state 130
+    ')'  shift, and go to state 153
 
 
 State 123
 
-   49 statement: ID '.' ID ASSIGN '"' . STRING '"'
+   41 conditie: conditie AND . conditie
 
-    STRING  shift, and go to state 140
+    ID       shift, and go to state 94
+    INTEGER  shift, and go to state 95
+    STRING   shift, and go to state 96
+    BOOLEAN  shift, and go to state 97
+    FLOAT    shift, and go to state 98
+    '('      shift, and go to state 99
+
+    conditie  go to state 154
 
 
 State 124
 
-   51 statement: ID '[' INTEGER ']' ASSIGN . ID '[' INTEGER ']'
-   52          | ID '[' INTEGER ']' ASSIGN . INTEGER
-   53          | ID '[' INTEGER ']' ASSIGN . '"' STRING '"'
-   54          | ID '[' INTEGER ']' ASSIGN . FLOAT
-   55          | ID '[' INTEGER ']' ASSIGN . BOOLEAN
-   56          | ID '[' INTEGER ']' ASSIGN . expresie
-   57 expresie: . expresie PLUS expresie
-   58         | . expresie MINUS expresie
-   59         | . expresie MULT expresie
-   60         | . expresie SUBT expresie
-   61         | . '(' expresie ')'
-   62         | . ID
-   63         | . INTEGER
+   40 conditie: conditie OR . conditie
 
-    ID       shift, and go to state 141
-    INTEGER  shift, and go to state 142
-    BOOLEAN  shift, and go to state 143
-    FLOAT    shift, and go to state 144
-    '('      shift, and go to state 68
-    '"'      shift, and go to state 145
+    ID       shift, and go to state 94
+    INTEGER  shift, and go to state 95
+    STRING   shift, and go to state 96
+    BOOLEAN  shift, and go to state 97
+    FLOAT    shift, and go to state 98
+    '('      shift, and go to state 99
 
-    expresie  go to state 146
+    conditie  go to state 155
 
 
 State 125
 
-   26 conditie: '(' conditie ')' .
+   34 conditie: conditie LT . conditie
 
-    $default  reduce using rule 26 (conditie)
+    ID       shift, and go to state 94
+    INTEGER  shift, and go to state 95
+    STRING   shift, and go to state 96
+    BOOLEAN  shift, and go to state 97
+    FLOAT    shift, and go to state 98
+    '('      shift, and go to state 99
+
+    conditie  go to state 156
 
 
 State 126
 
-   18 conditie: conditie . LT conditie
-   19         | conditie . GT conditie
-   20         | conditie . LTE conditie
-   21         | conditie . GTE conditie
-   22         | conditie . EQ conditie
-   23         | conditie . NEQ conditie
-   24         | conditie . OR conditie
-   25         | conditie . AND conditie
-   25         | conditie AND conditie .  [AND, LTE, GTE, ';', ')']
+   35 conditie: conditie GT . conditie
 
-    OR   shift, and go to state 101
-    LT   shift, and go to state 102
-    GT   shift, and go to state 103
-    LTE  shift, and go to state 104
-    GTE  shift, and go to state 105
-    EQ   shift, and go to state 106
-    NEQ  shift, and go to state 107
+    ID       shift, and go to state 94
+    INTEGER  shift, and go to state 95
+    STRING   shift, and go to state 96
+    BOOLEAN  shift, and go to state 97
+    FLOAT    shift, and go to state 98
+    '('      shift, and go to state 99
 
-    LTE       [reduce using rule 25 (conditie)]
-    GTE       [reduce using rule 25 (conditie)]
-    $default  reduce using rule 25 (conditie)
-
-    Conflict between rule 25 and token AND resolved as reduce (%left AND).
-    Conflict between rule 25 and token OR resolved as shift (AND < OR).
-    Conflict between rule 25 and token LT resolved as shift (AND < LT).
-    Conflict between rule 25 and token GT resolved as shift (AND < GT).
-    Conflict between rule 25 and token EQ resolved as shift (AND < EQ).
-    Conflict between rule 25 and token NEQ resolved as shift (AND < NEQ).
+    conditie  go to state 157
 
 
 State 127
 
-   18 conditie: conditie . LT conditie
-   19         | conditie . GT conditie
-   20         | conditie . LTE conditie
-   21         | conditie . GTE conditie
-   22         | conditie . EQ conditie
-   23         | conditie . NEQ conditie
-   24         | conditie . OR conditie
-   24         | conditie OR conditie .  [AND, OR, LTE, GTE, ';', ')']
-   25         | conditie . AND conditie
+   36 conditie: conditie LTE . conditie
 
-    LT   shift, and go to state 102
-    GT   shift, and go to state 103
-    LTE  shift, and go to state 104
-    GTE  shift, and go to state 105
-    EQ   shift, and go to state 106
-    NEQ  shift, and go to state 107
+    ID       shift, and go to state 94
+    INTEGER  shift, and go to state 95
+    STRING   shift, and go to state 96
+    BOOLEAN  shift, and go to state 97
+    FLOAT    shift, and go to state 98
+    '('      shift, and go to state 99
 
-    LTE       [reduce using rule 24 (conditie)]
-    GTE       [reduce using rule 24 (conditie)]
-    $default  reduce using rule 24 (conditie)
-
-    Conflict between rule 24 and token AND resolved as reduce (AND < OR).
-    Conflict between rule 24 and token OR resolved as reduce (%left OR).
-    Conflict between rule 24 and token LT resolved as shift (OR < LT).
-    Conflict between rule 24 and token GT resolved as shift (OR < GT).
-    Conflict between rule 24 and token EQ resolved as shift (OR < EQ).
-    Conflict between rule 24 and token NEQ resolved as shift (OR < NEQ).
+    conditie  go to state 158
 
 
 State 128
 
-   18 conditie: conditie . LT conditie
-   18         | conditie LT conditie .  [AND, OR, LT, GT, LTE, GTE, EQ, NEQ, ';', ')']
-   19         | conditie . GT conditie
-   20         | conditie . LTE conditie
-   21         | conditie . GTE conditie
-   22         | conditie . EQ conditie
-   23         | conditie . NEQ conditie
-   24         | conditie . OR conditie
-   25         | conditie . AND conditie
+   37 conditie: conditie GTE . conditie
 
-    LTE  shift, and go to state 104
-    GTE  shift, and go to state 105
+    ID       shift, and go to state 94
+    INTEGER  shift, and go to state 95
+    STRING   shift, and go to state 96
+    BOOLEAN  shift, and go to state 97
+    FLOAT    shift, and go to state 98
+    '('      shift, and go to state 99
 
-    LTE       [reduce using rule 18 (conditie)]
-    GTE       [reduce using rule 18 (conditie)]
-    $default  reduce using rule 18 (conditie)
-
-    Conflict between rule 18 and token AND resolved as reduce (AND < LT).
-    Conflict between rule 18 and token OR resolved as reduce (OR < LT).
-    Conflict between rule 18 and token LT resolved as reduce (%left LT).
-    Conflict between rule 18 and token GT resolved as reduce (%left GT).
-    Conflict between rule 18 and token EQ resolved as reduce (%left EQ).
-    Conflict between rule 18 and token NEQ resolved as reduce (%left NEQ).
+    conditie  go to state 159
 
 
 State 129
 
-   18 conditie: conditie . LT conditie
-   19         | conditie . GT conditie
-   19         | conditie GT conditie .  [AND, OR, LT, GT, LTE, GTE, EQ, NEQ, ';', ')']
-   20         | conditie . LTE conditie
-   21         | conditie . GTE conditie
-   22         | conditie . EQ conditie
-   23         | conditie . NEQ conditie
-   24         | conditie . OR conditie
-   25         | conditie . AND conditie
+   38 conditie: conditie EQ . conditie
 
-    LTE  shift, and go to state 104
-    GTE  shift, and go to state 105
+    ID       shift, and go to state 94
+    INTEGER  shift, and go to state 95
+    STRING   shift, and go to state 96
+    BOOLEAN  shift, and go to state 97
+    FLOAT    shift, and go to state 98
+    '('      shift, and go to state 99
 
-    LTE       [reduce using rule 19 (conditie)]
-    GTE       [reduce using rule 19 (conditie)]
-    $default  reduce using rule 19 (conditie)
-
-    Conflict between rule 19 and token AND resolved as reduce (AND < GT).
-    Conflict between rule 19 and token OR resolved as reduce (OR < GT).
-    Conflict between rule 19 and token LT resolved as reduce (%left LT).
-    Conflict between rule 19 and token GT resolved as reduce (%left GT).
-    Conflict between rule 19 and token EQ resolved as reduce (%left EQ).
-    Conflict between rule 19 and token NEQ resolved as reduce (%left NEQ).
+    conditie  go to state 160
 
 
 State 130
 
-   18 conditie: conditie . LT conditie
-   19         | conditie . GT conditie
-   20         | conditie . LTE conditie
-   20         | conditie LTE conditie .  [AND, OR, LT, GT, LTE, GTE, EQ, NEQ, ';', ')']
-   21         | conditie . GTE conditie
-   22         | conditie . EQ conditie
-   23         | conditie . NEQ conditie
-   24         | conditie . OR conditie
-   25         | conditie . AND conditie
+   39 conditie: conditie NEQ . conditie
 
-    AND  shift, and go to state 100
-    OR   shift, and go to state 101
-    LT   shift, and go to state 102
-    GT   shift, and go to state 103
-    LTE  shift, and go to state 104
-    GTE  shift, and go to state 105
-    EQ   shift, and go to state 106
-    NEQ  shift, and go to state 107
+    ID       shift, and go to state 94
+    INTEGER  shift, and go to state 95
+    STRING   shift, and go to state 96
+    BOOLEAN  shift, and go to state 97
+    FLOAT    shift, and go to state 98
+    '('      shift, and go to state 99
 
-    AND       [reduce using rule 20 (conditie)]
-    OR        [reduce using rule 20 (conditie)]
-    LT        [reduce using rule 20 (conditie)]
-    GT        [reduce using rule 20 (conditie)]
-    LTE       [reduce using rule 20 (conditie)]
-    GTE       [reduce using rule 20 (conditie)]
-    EQ        [reduce using rule 20 (conditie)]
-    NEQ       [reduce using rule 20 (conditie)]
-    $default  reduce using rule 20 (conditie)
+    conditie  go to state 161
 
 
 State 131
 
-   18 conditie: conditie . LT conditie
-   19         | conditie . GT conditie
-   20         | conditie . LTE conditie
-   21         | conditie . GTE conditie
-   21         | conditie GTE conditie .  [AND, OR, LT, GT, LTE, GTE, EQ, NEQ, ';', ')']
-   22         | conditie . EQ conditie
-   23         | conditie . NEQ conditie
-   24         | conditie . OR conditie
-   25         | conditie . AND conditie
+   88 control: IF '(' conditie ')' . '{' lista_instructiuni '}'
+   89        | IF '(' conditie ')' . ELSE '{' lista_instructiuni '}'
 
-    AND  shift, and go to state 100
-    OR   shift, and go to state 101
-    LT   shift, and go to state 102
-    GT   shift, and go to state 103
-    LTE  shift, and go to state 104
-    GTE  shift, and go to state 105
-    EQ   shift, and go to state 106
-    NEQ  shift, and go to state 107
-
-    AND       [reduce using rule 21 (conditie)]
-    OR        [reduce using rule 21 (conditie)]
-    LT        [reduce using rule 21 (conditie)]
-    GT        [reduce using rule 21 (conditie)]
-    LTE       [reduce using rule 21 (conditie)]
-    GTE       [reduce using rule 21 (conditie)]
-    EQ        [reduce using rule 21 (conditie)]
-    NEQ       [reduce using rule 21 (conditie)]
-    $default  reduce using rule 21 (conditie)
+    ELSE  shift, and go to state 162
+    '{'   shift, and go to state 163
 
 
 State 132
 
-   18 conditie: conditie . LT conditie
-   19         | conditie . GT conditie
-   20         | conditie . LTE conditie
-   21         | conditie . GTE conditie
-   22         | conditie . EQ conditie
-   22         | conditie EQ conditie .  [AND, OR, LT, GT, LTE, GTE, EQ, NEQ, ';', ')']
-   23         | conditie . NEQ conditie
-   24         | conditie . OR conditie
-   25         | conditie . AND conditie
+   90 control: FOR '(' statement ';' . conditie ';' statement ')' '{' lista_instructiuni '}'
 
-    LTE  shift, and go to state 104
-    GTE  shift, and go to state 105
+    ID       shift, and go to state 94
+    INTEGER  shift, and go to state 95
+    STRING   shift, and go to state 96
+    BOOLEAN  shift, and go to state 97
+    FLOAT    shift, and go to state 98
+    '('      shift, and go to state 99
 
-    LTE       [reduce using rule 22 (conditie)]
-    GTE       [reduce using rule 22 (conditie)]
-    $default  reduce using rule 22 (conditie)
-
-    Conflict between rule 22 and token AND resolved as reduce (AND < EQ).
-    Conflict between rule 22 and token OR resolved as reduce (OR < EQ).
-    Conflict between rule 22 and token LT resolved as reduce (%left LT).
-    Conflict between rule 22 and token GT resolved as reduce (%left GT).
-    Conflict between rule 22 and token EQ resolved as reduce (%left EQ).
-    Conflict between rule 22 and token NEQ resolved as reduce (%left NEQ).
+    conditie  go to state 164
 
 
 State 133
 
-   18 conditie: conditie . LT conditie
-   19         | conditie . GT conditie
-   20         | conditie . LTE conditie
-   21         | conditie . GTE conditie
-   22         | conditie . EQ conditie
-   23         | conditie . NEQ conditie
-   23         | conditie NEQ conditie .  [AND, OR, LT, GT, LTE, GTE, EQ, NEQ, ';', ')']
-   24         | conditie . OR conditie
-   25         | conditie . AND conditie
+   91 control: WHILE '(' conditie ')' . '{' lista_instructiuni '}'
 
-    LTE  shift, and go to state 104
-    GTE  shift, and go to state 105
-
-    LTE       [reduce using rule 23 (conditie)]
-    GTE       [reduce using rule 23 (conditie)]
-    $default  reduce using rule 23 (conditie)
-
-    Conflict between rule 23 and token AND resolved as reduce (AND < NEQ).
-    Conflict between rule 23 and token OR resolved as reduce (OR < NEQ).
-    Conflict between rule 23 and token LT resolved as reduce (%left LT).
-    Conflict between rule 23 and token GT resolved as reduce (%left GT).
-    Conflict between rule 23 and token EQ resolved as reduce (%left EQ).
-    Conflict between rule 23 and token NEQ resolved as reduce (%left NEQ).
+    '{'  shift, and go to state 165
 
 
 State 134
 
-   65 control: IF '(' conditie ')' ELSE . '{' lista_instructiuni '}'
+   28 param_fd: TIP . ID
 
-    '{'  shift, and go to state 147
+    ID  shift, and go to state 166
 
 
 State 135
 
-   33 lista_instructiuni: . lista_control
-   34                   | . lista_statement
-   35                   | . lista_instructiuni lista_control
-   36                   | . lista_instructiuni lista_statement
-   37 lista_statement: . statement ';'
-   38                | . lista_statement statement ';'
-   39 statement: . ID ASSIGN ID
-   40          | . ID ASSIGN INTEGER
-   41          | . ID ASSIGN expresie
-   42          | . ID ASSIGN FLOAT
-   43          | . ID ASSIGN BOOLEAN
-   44          | . ID ASSIGN '"' STRING '"'
-   45          | . ID '.' ID ASSIGN ID '.' ID
-   46          | . ID '.' ID ASSIGN INTEGER
-   47          | . ID '.' ID ASSIGN FLOAT
-   48          | . ID '.' ID ASSIGN BOOLEAN
-   49          | . ID '.' ID ASSIGN '"' STRING '"'
-   50          | . ID '(' lista_apel ')'
-   51          | . ID '[' INTEGER ']' ASSIGN ID '[' INTEGER ']'
-   52          | . ID '[' INTEGER ']' ASSIGN INTEGER
-   53          | . ID '[' INTEGER ']' ASSIGN '"' STRING '"'
-   54          | . ID '[' INTEGER ']' ASSIGN FLOAT
-   55          | . ID '[' INTEGER ']' ASSIGN BOOLEAN
-   56          | . ID '[' INTEGER ']' ASSIGN expresie
-   64 control: . IF '(' conditie ')' '{' lista_instructiuni '}'
-   64        | IF '(' conditie ')' '{' . lista_instructiuni '}'
-   65        | . IF '(' conditie ')' ELSE '{' lista_instructiuni '}'
-   66        | . FOR '(' statement ';' conditie ';' statement ')' '{' lista_instructiuni '}'
-   67        | . WHILE '(' conditie ')' '{' lista_instructiuni '}'
-   68 lista_control: . control
-   69              | . lista_control control
+   26 lista_param_functii_definite: lista_param_functii_definite . ',' param_fd
+   46 functie: FUNCTION TIP ID '(' lista_param_functii_definite . ')' bloc_functie
 
-    ID     shift, and go to state 32
-    IF     shift, and go to state 33
-    FOR    shift, and go to state 34
-    WHILE  shift, and go to state 35
-
-    lista_instructiuni  go to state 148
-    lista_statement     go to state 37
-    statement           go to state 38
-    control             go to state 39
-    lista_control       go to state 40
+    ')'  shift, and go to state 167
+    ','  shift, and go to state 168
 
 
 State 136
 
-   18 conditie: conditie . LT conditie
-   19         | conditie . GT conditie
-   20         | conditie . LTE conditie
-   21         | conditie . GTE conditie
-   22         | conditie . EQ conditie
-   23         | conditie . NEQ conditie
-   24         | conditie . OR conditie
-   25         | conditie . AND conditie
-   66 control: FOR '(' statement ';' conditie . ';' statement ')' '{' lista_instructiuni '}'
+   25 lista_param_functii_definite: param_fd .
 
-    AND  shift, and go to state 100
-    OR   shift, and go to state 101
-    LT   shift, and go to state 102
-    GT   shift, and go to state 103
-    LTE  shift, and go to state 104
-    GTE  shift, and go to state 105
-    EQ   shift, and go to state 106
-    NEQ  shift, and go to state 107
-    ';'  shift, and go to state 149
+    $default  reduce using rule 25 (lista_param_functii_definite)
 
 
 State 137
 
-   33 lista_instructiuni: . lista_control
-   34                   | . lista_statement
-   35                   | . lista_instructiuni lista_control
-   36                   | . lista_instructiuni lista_statement
-   37 lista_statement: . statement ';'
-   38                | . lista_statement statement ';'
-   39 statement: . ID ASSIGN ID
-   40          | . ID ASSIGN INTEGER
-   41          | . ID ASSIGN expresie
-   42          | . ID ASSIGN FLOAT
-   43          | . ID ASSIGN BOOLEAN
-   44          | . ID ASSIGN '"' STRING '"'
-   45          | . ID '.' ID ASSIGN ID '.' ID
-   46          | . ID '.' ID ASSIGN INTEGER
-   47          | . ID '.' ID ASSIGN FLOAT
-   48          | . ID '.' ID ASSIGN BOOLEAN
-   49          | . ID '.' ID ASSIGN '"' STRING '"'
-   50          | . ID '(' lista_apel ')'
-   51          | . ID '[' INTEGER ']' ASSIGN ID '[' INTEGER ']'
-   52          | . ID '[' INTEGER ']' ASSIGN INTEGER
-   53          | . ID '[' INTEGER ']' ASSIGN '"' STRING '"'
-   54          | . ID '[' INTEGER ']' ASSIGN FLOAT
-   55          | . ID '[' INTEGER ']' ASSIGN BOOLEAN
-   56          | . ID '[' INTEGER ']' ASSIGN expresie
-   64 control: . IF '(' conditie ')' '{' lista_instructiuni '}'
-   65        | . IF '(' conditie ')' ELSE '{' lista_instructiuni '}'
-   66        | . FOR '(' statement ';' conditie ';' statement ')' '{' lista_instructiuni '}'
-   67        | . WHILE '(' conditie ')' '{' lista_instructiuni '}'
-   67        | WHILE '(' conditie ')' '{' . lista_instructiuni '}'
-   68 lista_control: . control
-   69              | . lista_control control
+   15 declaratie_struct: TIP ID '(' lista_param ')' .
 
-    ID     shift, and go to state 32
-    IF     shift, and go to state 33
-    FOR    shift, and go to state 34
-    WHILE  shift, and go to state 35
-
-    lista_instructiuni  go to state 150
-    lista_statement     go to state 37
-    statement           go to state 38
-    control             go to state 39
-    lista_control       go to state 40
+    $default  reduce using rule 15 (declaratie_struct)
 
 
 State 138
 
-   27 bloc: . '{' lista_instructiuni '}'
-   31 functie: FUNCTION TIP ID '(' lista_param ')' . bloc
+   14 declaratie_struct: STRUCT ID '{' declaratii_struct '}' .
 
-    '{'  shift, and go to state 151
-
-    bloc  go to state 152
+    $default  reduce using rule 14 (declaratie_struct)
 
 
 State 139
 
-   45 statement: ID '.' ID ASSIGN ID '.' . ID
+   17 declaratie_struct: ARRAY LT TIP ',' INTEGER . GT ID
 
-    ID  shift, and go to state 153
+    GT  shift, and go to state 169
 
 
 State 140
 
-   49 statement: ID '.' ID ASSIGN '"' STRING . '"'
+   85 expresie: '(' expresie ')' .
 
-    '"'  shift, and go to state 154
+    $default  reduce using rule 85 (expresie)
 
 
 State 141
 
-   51 statement: ID '[' INTEGER ']' ASSIGN ID . '[' INTEGER ']'
-   62 expresie: ID .  [PLUS, MINUS, MULT, SUBT, ';', ')']
+   68 statement: ID ASSIGN '"' STRING '"' .
 
-    '['  shift, and go to state 155
-
-    $default  reduce using rule 62 (expresie)
+    $default  reduce using rule 68 (statement)
 
 
 State 142
 
-   52 statement: ID '[' INTEGER ']' ASSIGN INTEGER .  [';', ')']
-   63 expresie: INTEGER .  [PLUS, MINUS, MULT, SUBT, ';', ')']
+   81 expresie: expresie . PLUS expresie
+   81         | expresie PLUS expresie .
+   82         | expresie . MINUS expresie
+   83         | expresie . MULT expresie
+   84         | expresie . SUBT expresie
 
-    ';'       reduce using rule 52 (statement)
-    ';'       [reduce using rule 63 (expresie)]
-    ')'       reduce using rule 52 (statement)
-    ')'       [reduce using rule 63 (expresie)]
-    $default  reduce using rule 63 (expresie)
+    MINUS  shift, and go to state 115
+    MULT   shift, and go to state 116
+    SUBT   shift, and go to state 117
+
+    $default  reduce using rule 81 (expresie)
 
 
 State 143
 
-   55 statement: ID '[' INTEGER ']' ASSIGN BOOLEAN .
+   81 expresie: expresie . PLUS expresie
+   82         | expresie . MINUS expresie
+   82         | expresie MINUS expresie .
+   83         | expresie . MULT expresie
+   84         | expresie . SUBT expresie
 
-    $default  reduce using rule 55 (statement)
+    MULT  shift, and go to state 116
+    SUBT  shift, and go to state 117
+
+    $default  reduce using rule 82 (expresie)
 
 
 State 144
 
-   54 statement: ID '[' INTEGER ']' ASSIGN FLOAT .
+   81 expresie: expresie . PLUS expresie
+   82         | expresie . MINUS expresie
+   83         | expresie . MULT expresie
+   83         | expresie MULT expresie .
+   84         | expresie . SUBT expresie
 
-    $default  reduce using rule 54 (statement)
+    SUBT  shift, and go to state 117
+
+    $default  reduce using rule 83 (expresie)
 
 
 State 145
 
-   53 statement: ID '[' INTEGER ']' ASSIGN '"' . STRING '"'
+   81 expresie: expresie . PLUS expresie
+   82         | expresie . MINUS expresie
+   83         | expresie . MULT expresie
+   84         | expresie . SUBT expresie
+   84         | expresie SUBT expresie .
 
-    STRING  shift, and go to state 156
+    $default  reduce using rule 84 (expresie)
 
 
 State 146
 
-   56 statement: ID '[' INTEGER ']' ASSIGN expresie .  [';', ')']
-   57 expresie: expresie . PLUS expresie
-   58         | expresie . MINUS expresie
-   59         | expresie . MULT expresie
-   60         | expresie . SUBT expresie
+   95 lista_apel: lista_apel ',' tipuri .
 
-    PLUS   shift, and go to state 91
-    MINUS  shift, and go to state 92
-    MULT   shift, and go to state 93
-    SUBT   shift, and go to state 94
-
-    $default  reduce using rule 56 (statement)
+    $default  reduce using rule 95 (lista_apel)
 
 
 State 147
 
-   33 lista_instructiuni: . lista_control
-   34                   | . lista_statement
-   35                   | . lista_instructiuni lista_control
-   36                   | . lista_instructiuni lista_statement
-   37 lista_statement: . statement ';'
-   38                | . lista_statement statement ';'
-   39 statement: . ID ASSIGN ID
-   40          | . ID ASSIGN INTEGER
-   41          | . ID ASSIGN expresie
-   42          | . ID ASSIGN FLOAT
-   43          | . ID ASSIGN BOOLEAN
-   44          | . ID ASSIGN '"' STRING '"'
-   45          | . ID '.' ID ASSIGN ID '.' ID
-   46          | . ID '.' ID ASSIGN INTEGER
-   47          | . ID '.' ID ASSIGN FLOAT
-   48          | . ID '.' ID ASSIGN BOOLEAN
-   49          | . ID '.' ID ASSIGN '"' STRING '"'
-   50          | . ID '(' lista_apel ')'
-   51          | . ID '[' INTEGER ']' ASSIGN ID '[' INTEGER ']'
-   52          | . ID '[' INTEGER ']' ASSIGN INTEGER
-   53          | . ID '[' INTEGER ']' ASSIGN '"' STRING '"'
-   54          | . ID '[' INTEGER ']' ASSIGN FLOAT
-   55          | . ID '[' INTEGER ']' ASSIGN BOOLEAN
-   56          | . ID '[' INTEGER ']' ASSIGN expresie
-   64 control: . IF '(' conditie ')' '{' lista_instructiuni '}'
-   65        | . IF '(' conditie ')' ELSE '{' lista_instructiuni '}'
-   65        | IF '(' conditie ')' ELSE '{' . lista_instructiuni '}'
-   66        | . FOR '(' statement ';' conditie ';' statement ')' '{' lista_instructiuni '}'
-   67        | . WHILE '(' conditie ')' '{' lista_instructiuni '}'
-   68 lista_control: . control
-   69              | . lista_control control
+   69 statement: ID '.' ID ASSIGN ID . '.' ID
 
-    ID     shift, and go to state 32
-    IF     shift, and go to state 33
-    FOR    shift, and go to state 34
-    WHILE  shift, and go to state 35
-
-    lista_instructiuni  go to state 157
-    lista_statement     go to state 37
-    statement           go to state 38
-    control             go to state 39
-    lista_control       go to state 40
+    '.'  shift, and go to state 170
 
 
 State 148
 
-   35 lista_instructiuni: lista_instructiuni . lista_control
-   36                   | lista_instructiuni . lista_statement
-   37 lista_statement: . statement ';'
-   38                | . lista_statement statement ';'
-   39 statement: . ID ASSIGN ID
-   40          | . ID ASSIGN INTEGER
-   41          | . ID ASSIGN expresie
-   42          | . ID ASSIGN FLOAT
-   43          | . ID ASSIGN BOOLEAN
-   44          | . ID ASSIGN '"' STRING '"'
-   45          | . ID '.' ID ASSIGN ID '.' ID
-   46          | . ID '.' ID ASSIGN INTEGER
-   47          | . ID '.' ID ASSIGN FLOAT
-   48          | . ID '.' ID ASSIGN BOOLEAN
-   49          | . ID '.' ID ASSIGN '"' STRING '"'
-   50          | . ID '(' lista_apel ')'
-   51          | . ID '[' INTEGER ']' ASSIGN ID '[' INTEGER ']'
-   52          | . ID '[' INTEGER ']' ASSIGN INTEGER
-   53          | . ID '[' INTEGER ']' ASSIGN '"' STRING '"'
-   54          | . ID '[' INTEGER ']' ASSIGN FLOAT
-   55          | . ID '[' INTEGER ']' ASSIGN BOOLEAN
-   56          | . ID '[' INTEGER ']' ASSIGN expresie
-   64 control: . IF '(' conditie ')' '{' lista_instructiuni '}'
-   64        | IF '(' conditie ')' '{' lista_instructiuni . '}'
-   65        | . IF '(' conditie ')' ELSE '{' lista_instructiuni '}'
-   66        | . FOR '(' statement ';' conditie ';' statement ')' '{' lista_instructiuni '}'
-   67        | . WHILE '(' conditie ')' '{' lista_instructiuni '}'
-   68 lista_control: . control
-   69              | . lista_control control
+   70 statement: ID '.' ID ASSIGN INTEGER .
 
-    ID     shift, and go to state 32
-    IF     shift, and go to state 33
-    FOR    shift, and go to state 34
-    WHILE  shift, and go to state 35
-    '}'    shift, and go to state 158
-
-    lista_statement  go to state 56
-    statement        go to state 38
-    control          go to state 39
-    lista_control    go to state 57
+    $default  reduce using rule 70 (statement)
 
 
 State 149
 
-   39 statement: . ID ASSIGN ID
-   40          | . ID ASSIGN INTEGER
-   41          | . ID ASSIGN expresie
-   42          | . ID ASSIGN FLOAT
-   43          | . ID ASSIGN BOOLEAN
-   44          | . ID ASSIGN '"' STRING '"'
-   45          | . ID '.' ID ASSIGN ID '.' ID
-   46          | . ID '.' ID ASSIGN INTEGER
-   47          | . ID '.' ID ASSIGN FLOAT
-   48          | . ID '.' ID ASSIGN BOOLEAN
-   49          | . ID '.' ID ASSIGN '"' STRING '"'
-   50          | . ID '(' lista_apel ')'
-   51          | . ID '[' INTEGER ']' ASSIGN ID '[' INTEGER ']'
-   52          | . ID '[' INTEGER ']' ASSIGN INTEGER
-   53          | . ID '[' INTEGER ']' ASSIGN '"' STRING '"'
-   54          | . ID '[' INTEGER ']' ASSIGN FLOAT
-   55          | . ID '[' INTEGER ']' ASSIGN BOOLEAN
-   56          | . ID '[' INTEGER ']' ASSIGN expresie
-   66 control: FOR '(' statement ';' conditie ';' . statement ')' '{' lista_instructiuni '}'
+   72 statement: ID '.' ID ASSIGN BOOLEAN .
 
-    ID  shift, and go to state 32
-
-    statement  go to state 159
+    $default  reduce using rule 72 (statement)
 
 
 State 150
 
-   35 lista_instructiuni: lista_instructiuni . lista_control
-   36                   | lista_instructiuni . lista_statement
-   37 lista_statement: . statement ';'
-   38                | . lista_statement statement ';'
-   39 statement: . ID ASSIGN ID
-   40          | . ID ASSIGN INTEGER
-   41          | . ID ASSIGN expresie
-   42          | . ID ASSIGN FLOAT
-   43          | . ID ASSIGN BOOLEAN
-   44          | . ID ASSIGN '"' STRING '"'
-   45          | . ID '.' ID ASSIGN ID '.' ID
-   46          | . ID '.' ID ASSIGN INTEGER
-   47          | . ID '.' ID ASSIGN FLOAT
-   48          | . ID '.' ID ASSIGN BOOLEAN
-   49          | . ID '.' ID ASSIGN '"' STRING '"'
-   50          | . ID '(' lista_apel ')'
-   51          | . ID '[' INTEGER ']' ASSIGN ID '[' INTEGER ']'
-   52          | . ID '[' INTEGER ']' ASSIGN INTEGER
-   53          | . ID '[' INTEGER ']' ASSIGN '"' STRING '"'
-   54          | . ID '[' INTEGER ']' ASSIGN FLOAT
-   55          | . ID '[' INTEGER ']' ASSIGN BOOLEAN
-   56          | . ID '[' INTEGER ']' ASSIGN expresie
-   64 control: . IF '(' conditie ')' '{' lista_instructiuni '}'
-   65        | . IF '(' conditie ')' ELSE '{' lista_instructiuni '}'
-   66        | . FOR '(' statement ';' conditie ';' statement ')' '{' lista_instructiuni '}'
-   67        | . WHILE '(' conditie ')' '{' lista_instructiuni '}'
-   67        | WHILE '(' conditie ')' '{' lista_instructiuni . '}'
-   68 lista_control: . control
-   69              | . lista_control control
+   71 statement: ID '.' ID ASSIGN FLOAT .
 
-    ID     shift, and go to state 32
-    IF     shift, and go to state 33
-    FOR    shift, and go to state 34
-    WHILE  shift, and go to state 35
-    '}'    shift, and go to state 160
-
-    lista_statement  go to state 56
-    statement        go to state 38
-    control          go to state 39
-    lista_control    go to state 57
+    $default  reduce using rule 71 (statement)
 
 
 State 151
 
-   27 bloc: '{' . lista_instructiuni '}'
-   33 lista_instructiuni: . lista_control
-   34                   | . lista_statement
-   35                   | . lista_instructiuni lista_control
-   36                   | . lista_instructiuni lista_statement
-   37 lista_statement: . statement ';'
-   38                | . lista_statement statement ';'
-   39 statement: . ID ASSIGN ID
-   40          | . ID ASSIGN INTEGER
-   41          | . ID ASSIGN expresie
-   42          | . ID ASSIGN FLOAT
-   43          | . ID ASSIGN BOOLEAN
-   44          | . ID ASSIGN '"' STRING '"'
-   45          | . ID '.' ID ASSIGN ID '.' ID
-   46          | . ID '.' ID ASSIGN INTEGER
-   47          | . ID '.' ID ASSIGN FLOAT
-   48          | . ID '.' ID ASSIGN BOOLEAN
-   49          | . ID '.' ID ASSIGN '"' STRING '"'
-   50          | . ID '(' lista_apel ')'
-   51          | . ID '[' INTEGER ']' ASSIGN ID '[' INTEGER ']'
-   52          | . ID '[' INTEGER ']' ASSIGN INTEGER
-   53          | . ID '[' INTEGER ']' ASSIGN '"' STRING '"'
-   54          | . ID '[' INTEGER ']' ASSIGN FLOAT
-   55          | . ID '[' INTEGER ']' ASSIGN BOOLEAN
-   56          | . ID '[' INTEGER ']' ASSIGN expresie
-   64 control: . IF '(' conditie ')' '{' lista_instructiuni '}'
-   65        | . IF '(' conditie ')' ELSE '{' lista_instructiuni '}'
-   66        | . FOR '(' statement ';' conditie ';' statement ')' '{' lista_instructiuni '}'
-   67        | . WHILE '(' conditie ')' '{' lista_instructiuni '}'
-   68 lista_control: . control
-   69              | . lista_control control
+   73 statement: ID '.' ID ASSIGN '"' . STRING '"'
 
-    ID     shift, and go to state 32
-    IF     shift, and go to state 33
-    FOR    shift, and go to state 34
-    WHILE  shift, and go to state 35
-
-    lista_instructiuni  go to state 161
-    lista_statement     go to state 37
-    statement           go to state 38
-    control             go to state 39
-    lista_control       go to state 40
+    STRING  shift, and go to state 171
 
 
 State 152
 
-   31 functie: FUNCTION TIP ID '(' lista_param ')' bloc .
+   74 statement: ID '[' INTEGER ']' ASSIGN . ID '[' INTEGER ']'
+   75          | ID '[' INTEGER ']' ASSIGN . INTEGER
+   76          | ID '[' INTEGER ']' ASSIGN . '"' STRING '"'
+   77          | ID '[' INTEGER ']' ASSIGN . FLOAT
+   78          | ID '[' INTEGER ']' ASSIGN . BOOLEAN
+   79          | ID '[' INTEGER ']' ASSIGN . expresie
 
-    $default  reduce using rule 31 (functie)
+    ID       shift, and go to state 172
+    INTEGER  shift, and go to state 173
+    BOOLEAN  shift, and go to state 174
+    FLOAT    shift, and go to state 175
+    '('      shift, and go to state 86
+    '"'      shift, and go to state 176
+
+    expresie  go to state 177
 
 
 State 153
 
-   45 statement: ID '.' ID ASSIGN ID '.' ID .
+   42 conditie: '(' conditie ')' .
 
-    $default  reduce using rule 45 (statement)
+    $default  reduce using rule 42 (conditie)
 
 
 State 154
 
-   49 statement: ID '.' ID ASSIGN '"' STRING '"' .
+   34 conditie: conditie . LT conditie
+   35         | conditie . GT conditie
+   36         | conditie . LTE conditie
+   37         | conditie . GTE conditie
+   38         | conditie . EQ conditie
+   39         | conditie . NEQ conditie
+   40         | conditie . OR conditie
+   41         | conditie . AND conditie
+   41         | conditie AND conditie .
 
-    $default  reduce using rule 49 (statement)
+    OR   shift, and go to state 124
+    LT   shift, and go to state 125
+    GT   shift, and go to state 126
+    LTE  shift, and go to state 127
+    GTE  shift, and go to state 128
+    EQ   shift, and go to state 129
+    NEQ  shift, and go to state 130
+
+    LTE       [reduce using rule 41 (conditie)]
+    GTE       [reduce using rule 41 (conditie)]
+    $default  reduce using rule 41 (conditie)
 
 
 State 155
 
-   51 statement: ID '[' INTEGER ']' ASSIGN ID '[' . INTEGER ']'
+   34 conditie: conditie . LT conditie
+   35         | conditie . GT conditie
+   36         | conditie . LTE conditie
+   37         | conditie . GTE conditie
+   38         | conditie . EQ conditie
+   39         | conditie . NEQ conditie
+   40         | conditie . OR conditie
+   40         | conditie OR conditie .
+   41         | conditie . AND conditie
 
-    INTEGER  shift, and go to state 162
+    LT   shift, and go to state 125
+    GT   shift, and go to state 126
+    LTE  shift, and go to state 127
+    GTE  shift, and go to state 128
+    EQ   shift, and go to state 129
+    NEQ  shift, and go to state 130
+
+    LTE       [reduce using rule 40 (conditie)]
+    GTE       [reduce using rule 40 (conditie)]
+    $default  reduce using rule 40 (conditie)
 
 
 State 156
 
-   53 statement: ID '[' INTEGER ']' ASSIGN '"' STRING . '"'
+   34 conditie: conditie . LT conditie
+   34         | conditie LT conditie .
+   35         | conditie . GT conditie
+   36         | conditie . LTE conditie
+   37         | conditie . GTE conditie
+   38         | conditie . EQ conditie
+   39         | conditie . NEQ conditie
+   40         | conditie . OR conditie
+   41         | conditie . AND conditie
 
-    '"'  shift, and go to state 163
+    LTE  shift, and go to state 127
+    GTE  shift, and go to state 128
+
+    LTE       [reduce using rule 34 (conditie)]
+    GTE       [reduce using rule 34 (conditie)]
+    $default  reduce using rule 34 (conditie)
 
 
 State 157
 
-   35 lista_instructiuni: lista_instructiuni . lista_control
-   36                   | lista_instructiuni . lista_statement
-   37 lista_statement: . statement ';'
-   38                | . lista_statement statement ';'
-   39 statement: . ID ASSIGN ID
-   40          | . ID ASSIGN INTEGER
-   41          | . ID ASSIGN expresie
-   42          | . ID ASSIGN FLOAT
-   43          | . ID ASSIGN BOOLEAN
-   44          | . ID ASSIGN '"' STRING '"'
-   45          | . ID '.' ID ASSIGN ID '.' ID
-   46          | . ID '.' ID ASSIGN INTEGER
-   47          | . ID '.' ID ASSIGN FLOAT
-   48          | . ID '.' ID ASSIGN BOOLEAN
-   49          | . ID '.' ID ASSIGN '"' STRING '"'
-   50          | . ID '(' lista_apel ')'
-   51          | . ID '[' INTEGER ']' ASSIGN ID '[' INTEGER ']'
-   52          | . ID '[' INTEGER ']' ASSIGN INTEGER
-   53          | . ID '[' INTEGER ']' ASSIGN '"' STRING '"'
-   54          | . ID '[' INTEGER ']' ASSIGN FLOAT
-   55          | . ID '[' INTEGER ']' ASSIGN BOOLEAN
-   56          | . ID '[' INTEGER ']' ASSIGN expresie
-   64 control: . IF '(' conditie ')' '{' lista_instructiuni '}'
-   65        | . IF '(' conditie ')' ELSE '{' lista_instructiuni '}'
-   65        | IF '(' conditie ')' ELSE '{' lista_instructiuni . '}'
-   66        | . FOR '(' statement ';' conditie ';' statement ')' '{' lista_instructiuni '}'
-   67        | . WHILE '(' conditie ')' '{' lista_instructiuni '}'
-   68 lista_control: . control
-   69              | . lista_control control
+   34 conditie: conditie . LT conditie
+   35         | conditie . GT conditie
+   35         | conditie GT conditie .
+   36         | conditie . LTE conditie
+   37         | conditie . GTE conditie
+   38         | conditie . EQ conditie
+   39         | conditie . NEQ conditie
+   40         | conditie . OR conditie
+   41         | conditie . AND conditie
 
-    ID     shift, and go to state 32
-    IF     shift, and go to state 33
-    FOR    shift, and go to state 34
-    WHILE  shift, and go to state 35
-    '}'    shift, and go to state 164
+    LTE  shift, and go to state 127
+    GTE  shift, and go to state 128
 
-    lista_statement  go to state 56
-    statement        go to state 38
-    control          go to state 39
-    lista_control    go to state 57
+    LTE       [reduce using rule 35 (conditie)]
+    GTE       [reduce using rule 35 (conditie)]
+    $default  reduce using rule 35 (conditie)
 
 
 State 158
 
-   64 control: IF '(' conditie ')' '{' lista_instructiuni '}' .
+   34 conditie: conditie . LT conditie
+   35         | conditie . GT conditie
+   36         | conditie . LTE conditie
+   36         | conditie LTE conditie .
+   37         | conditie . GTE conditie
+   38         | conditie . EQ conditie
+   39         | conditie . NEQ conditie
+   40         | conditie . OR conditie
+   41         | conditie . AND conditie
 
-    $default  reduce using rule 64 (control)
+    AND  shift, and go to state 123
+    OR   shift, and go to state 124
+    LT   shift, and go to state 125
+    GT   shift, and go to state 126
+    LTE  shift, and go to state 127
+    GTE  shift, and go to state 128
+    EQ   shift, and go to state 129
+    NEQ  shift, and go to state 130
+
+    AND       [reduce using rule 36 (conditie)]
+    OR        [reduce using rule 36 (conditie)]
+    LT        [reduce using rule 36 (conditie)]
+    GT        [reduce using rule 36 (conditie)]
+    LTE       [reduce using rule 36 (conditie)]
+    GTE       [reduce using rule 36 (conditie)]
+    EQ        [reduce using rule 36 (conditie)]
+    NEQ       [reduce using rule 36 (conditie)]
+    $default  reduce using rule 36 (conditie)
 
 
 State 159
 
-   66 control: FOR '(' statement ';' conditie ';' statement . ')' '{' lista_instructiuni '}'
+   34 conditie: conditie . LT conditie
+   35         | conditie . GT conditie
+   36         | conditie . LTE conditie
+   37         | conditie . GTE conditie
+   37         | conditie GTE conditie .
+   38         | conditie . EQ conditie
+   39         | conditie . NEQ conditie
+   40         | conditie . OR conditie
+   41         | conditie . AND conditie
 
-    ')'  shift, and go to state 165
+    AND  shift, and go to state 123
+    OR   shift, and go to state 124
+    LT   shift, and go to state 125
+    GT   shift, and go to state 126
+    LTE  shift, and go to state 127
+    GTE  shift, and go to state 128
+    EQ   shift, and go to state 129
+    NEQ  shift, and go to state 130
+
+    AND       [reduce using rule 37 (conditie)]
+    OR        [reduce using rule 37 (conditie)]
+    LT        [reduce using rule 37 (conditie)]
+    GT        [reduce using rule 37 (conditie)]
+    LTE       [reduce using rule 37 (conditie)]
+    GTE       [reduce using rule 37 (conditie)]
+    EQ        [reduce using rule 37 (conditie)]
+    NEQ       [reduce using rule 37 (conditie)]
+    $default  reduce using rule 37 (conditie)
 
 
 State 160
 
-   67 control: WHILE '(' conditie ')' '{' lista_instructiuni '}' .
+   34 conditie: conditie . LT conditie
+   35         | conditie . GT conditie
+   36         | conditie . LTE conditie
+   37         | conditie . GTE conditie
+   38         | conditie . EQ conditie
+   38         | conditie EQ conditie .
+   39         | conditie . NEQ conditie
+   40         | conditie . OR conditie
+   41         | conditie . AND conditie
 
-    $default  reduce using rule 67 (control)
+    LTE  shift, and go to state 127
+    GTE  shift, and go to state 128
+
+    LTE       [reduce using rule 38 (conditie)]
+    GTE       [reduce using rule 38 (conditie)]
+    $default  reduce using rule 38 (conditie)
 
 
 State 161
 
-   27 bloc: '{' lista_instructiuni . '}'
-   35 lista_instructiuni: lista_instructiuni . lista_control
-   36                   | lista_instructiuni . lista_statement
-   37 lista_statement: . statement ';'
-   38                | . lista_statement statement ';'
-   39 statement: . ID ASSIGN ID
-   40          | . ID ASSIGN INTEGER
-   41          | . ID ASSIGN expresie
-   42          | . ID ASSIGN FLOAT
-   43          | . ID ASSIGN BOOLEAN
-   44          | . ID ASSIGN '"' STRING '"'
-   45          | . ID '.' ID ASSIGN ID '.' ID
-   46          | . ID '.' ID ASSIGN INTEGER
-   47          | . ID '.' ID ASSIGN FLOAT
-   48          | . ID '.' ID ASSIGN BOOLEAN
-   49          | . ID '.' ID ASSIGN '"' STRING '"'
-   50          | . ID '(' lista_apel ')'
-   51          | . ID '[' INTEGER ']' ASSIGN ID '[' INTEGER ']'
-   52          | . ID '[' INTEGER ']' ASSIGN INTEGER
-   53          | . ID '[' INTEGER ']' ASSIGN '"' STRING '"'
-   54          | . ID '[' INTEGER ']' ASSIGN FLOAT
-   55          | . ID '[' INTEGER ']' ASSIGN BOOLEAN
-   56          | . ID '[' INTEGER ']' ASSIGN expresie
-   64 control: . IF '(' conditie ')' '{' lista_instructiuni '}'
-   65        | . IF '(' conditie ')' ELSE '{' lista_instructiuni '}'
-   66        | . FOR '(' statement ';' conditie ';' statement ')' '{' lista_instructiuni '}'
-   67        | . WHILE '(' conditie ')' '{' lista_instructiuni '}'
-   68 lista_control: . control
-   69              | . lista_control control
+   34 conditie: conditie . LT conditie
+   35         | conditie . GT conditie
+   36         | conditie . LTE conditie
+   37         | conditie . GTE conditie
+   38         | conditie . EQ conditie
+   39         | conditie . NEQ conditie
+   39         | conditie NEQ conditie .
+   40         | conditie . OR conditie
+   41         | conditie . AND conditie
 
-    ID     shift, and go to state 32
-    IF     shift, and go to state 33
-    FOR    shift, and go to state 34
-    WHILE  shift, and go to state 35
-    '}'    shift, and go to state 166
+    LTE  shift, and go to state 127
+    GTE  shift, and go to state 128
 
-    lista_statement  go to state 56
-    statement        go to state 38
-    control          go to state 39
-    lista_control    go to state 57
+    LTE       [reduce using rule 39 (conditie)]
+    GTE       [reduce using rule 39 (conditie)]
+    $default  reduce using rule 39 (conditie)
 
 
 State 162
 
-   51 statement: ID '[' INTEGER ']' ASSIGN ID '[' INTEGER . ']'
+   89 control: IF '(' conditie ')' ELSE . '{' lista_instructiuni '}'
 
-    ']'  shift, and go to state 167
+    '{'  shift, and go to state 178
 
 
 State 163
 
-   53 statement: ID '[' INTEGER ']' ASSIGN '"' STRING '"' .
+   88 control: IF '(' conditie ')' '{' . lista_instructiuni '}'
 
-    $default  reduce using rule 53 (statement)
+    ID      shift, and go to state 37
+    TIP     shift, and go to state 179
+    STRUCT  shift, and go to state 180
+    IF      shift, and go to state 38
+    FOR     shift, and go to state 39
+    WHILE   shift, and go to state 40
+    CONST   shift, and go to state 181
+    ARRAY   shift, and go to state 182
+
+    declaratii_in_functie  go to state 183
+    lista_instructiuni     go to state 184
+    lista_statement        go to state 185
+    statement              go to state 44
+    control                go to state 45
+    lista_control          go to state 186
 
 
 State 164
 
-   65 control: IF '(' conditie ')' ELSE '{' lista_instructiuni '}' .
+   34 conditie: conditie . LT conditie
+   35         | conditie . GT conditie
+   36         | conditie . LTE conditie
+   37         | conditie . GTE conditie
+   38         | conditie . EQ conditie
+   39         | conditie . NEQ conditie
+   40         | conditie . OR conditie
+   41         | conditie . AND conditie
+   90 control: FOR '(' statement ';' conditie . ';' statement ')' '{' lista_instructiuni '}'
 
-    $default  reduce using rule 65 (control)
+    AND  shift, and go to state 123
+    OR   shift, and go to state 124
+    LT   shift, and go to state 125
+    GT   shift, and go to state 126
+    LTE  shift, and go to state 127
+    GTE  shift, and go to state 128
+    EQ   shift, and go to state 129
+    NEQ  shift, and go to state 130
+    ';'  shift, and go to state 187
 
 
 State 165
 
-   66 control: FOR '(' statement ';' conditie ';' statement ')' . '{' lista_instructiuni '}'
+   91 control: WHILE '(' conditie ')' '{' . lista_instructiuni '}'
 
-    '{'  shift, and go to state 168
+    ID      shift, and go to state 37
+    TIP     shift, and go to state 179
+    STRUCT  shift, and go to state 180
+    IF      shift, and go to state 38
+    FOR     shift, and go to state 39
+    WHILE   shift, and go to state 40
+    CONST   shift, and go to state 181
+    ARRAY   shift, and go to state 182
+
+    declaratii_in_functie  go to state 183
+    lista_instructiuni     go to state 188
+    lista_statement        go to state 185
+    statement              go to state 44
+    control                go to state 45
+    lista_control          go to state 186
 
 
 State 166
 
-   27 bloc: '{' lista_instructiuni '}' .
+   28 param_fd: TIP ID .
 
-    $default  reduce using rule 27 (bloc)
+    $default  reduce using rule 28 (param_fd)
 
 
 State 167
 
-   51 statement: ID '[' INTEGER ']' ASSIGN ID '[' INTEGER ']' .
+   46 functie: FUNCTION TIP ID '(' lista_param_functii_definite ')' . bloc_functie
 
-    $default  reduce using rule 51 (statement)
+    '{'  shift, and go to state 189
+
+    bloc_functie  go to state 190
 
 
 State 168
 
-   33 lista_instructiuni: . lista_control
-   34                   | . lista_statement
-   35                   | . lista_instructiuni lista_control
-   36                   | . lista_instructiuni lista_statement
-   37 lista_statement: . statement ';'
-   38                | . lista_statement statement ';'
-   39 statement: . ID ASSIGN ID
-   40          | . ID ASSIGN INTEGER
-   41          | . ID ASSIGN expresie
-   42          | . ID ASSIGN FLOAT
-   43          | . ID ASSIGN BOOLEAN
-   44          | . ID ASSIGN '"' STRING '"'
-   45          | . ID '.' ID ASSIGN ID '.' ID
-   46          | . ID '.' ID ASSIGN INTEGER
-   47          | . ID '.' ID ASSIGN FLOAT
-   48          | . ID '.' ID ASSIGN BOOLEAN
-   49          | . ID '.' ID ASSIGN '"' STRING '"'
-   50          | . ID '(' lista_apel ')'
-   51          | . ID '[' INTEGER ']' ASSIGN ID '[' INTEGER ']'
-   52          | . ID '[' INTEGER ']' ASSIGN INTEGER
-   53          | . ID '[' INTEGER ']' ASSIGN '"' STRING '"'
-   54          | . ID '[' INTEGER ']' ASSIGN FLOAT
-   55          | . ID '[' INTEGER ']' ASSIGN BOOLEAN
-   56          | . ID '[' INTEGER ']' ASSIGN expresie
-   64 control: . IF '(' conditie ')' '{' lista_instructiuni '}'
-   65        | . IF '(' conditie ')' ELSE '{' lista_instructiuni '}'
-   66        | . FOR '(' statement ';' conditie ';' statement ')' '{' lista_instructiuni '}'
-   66        | FOR '(' statement ';' conditie ';' statement ')' '{' . lista_instructiuni '}'
-   67        | . WHILE '(' conditie ')' '{' lista_instructiuni '}'
-   68 lista_control: . control
-   69              | . lista_control control
+   26 lista_param_functii_definite: lista_param_functii_definite ',' . param_fd
 
-    ID     shift, and go to state 32
-    IF     shift, and go to state 33
-    FOR    shift, and go to state 34
-    WHILE  shift, and go to state 35
+    TIP  shift, and go to state 134
 
-    lista_instructiuni  go to state 169
-    lista_statement     go to state 37
-    statement           go to state 38
-    control             go to state 39
-    lista_control       go to state 40
+    param_fd  go to state 191
 
 
 State 169
 
-   35 lista_instructiuni: lista_instructiuni . lista_control
-   36                   | lista_instructiuni . lista_statement
-   37 lista_statement: . statement ';'
-   38                | . lista_statement statement ';'
-   39 statement: . ID ASSIGN ID
-   40          | . ID ASSIGN INTEGER
-   41          | . ID ASSIGN expresie
-   42          | . ID ASSIGN FLOAT
-   43          | . ID ASSIGN BOOLEAN
-   44          | . ID ASSIGN '"' STRING '"'
-   45          | . ID '.' ID ASSIGN ID '.' ID
-   46          | . ID '.' ID ASSIGN INTEGER
-   47          | . ID '.' ID ASSIGN FLOAT
-   48          | . ID '.' ID ASSIGN BOOLEAN
-   49          | . ID '.' ID ASSIGN '"' STRING '"'
-   50          | . ID '(' lista_apel ')'
-   51          | . ID '[' INTEGER ']' ASSIGN ID '[' INTEGER ']'
-   52          | . ID '[' INTEGER ']' ASSIGN INTEGER
-   53          | . ID '[' INTEGER ']' ASSIGN '"' STRING '"'
-   54          | . ID '[' INTEGER ']' ASSIGN FLOAT
-   55          | . ID '[' INTEGER ']' ASSIGN BOOLEAN
-   56          | . ID '[' INTEGER ']' ASSIGN expresie
-   64 control: . IF '(' conditie ')' '{' lista_instructiuni '}'
-   65        | . IF '(' conditie ')' ELSE '{' lista_instructiuni '}'
-   66        | . FOR '(' statement ';' conditie ';' statement ')' '{' lista_instructiuni '}'
-   66        | FOR '(' statement ';' conditie ';' statement ')' '{' lista_instructiuni . '}'
-   67        | . WHILE '(' conditie ')' '{' lista_instructiuni '}'
-   68 lista_control: . control
-   69              | . lista_control control
+   17 declaratie_struct: ARRAY LT TIP ',' INTEGER GT . ID
 
-    ID     shift, and go to state 32
-    IF     shift, and go to state 33
-    FOR    shift, and go to state 34
-    WHILE  shift, and go to state 35
-    '}'    shift, and go to state 170
-
-    lista_statement  go to state 56
-    statement        go to state 38
-    control          go to state 39
-    lista_control    go to state 57
+    ID  shift, and go to state 192
 
 
 State 170
 
-   66 control: FOR '(' statement ';' conditie ';' statement ')' '{' lista_instructiuni '}' .
+   69 statement: ID '.' ID ASSIGN ID '.' . ID
 
-    $default  reduce using rule 66 (control)
+    ID  shift, and go to state 193
+
+
+State 171
+
+   73 statement: ID '.' ID ASSIGN '"' STRING . '"'
+
+    '"'  shift, and go to state 194
+
+
+State 172
+
+   74 statement: ID '[' INTEGER ']' ASSIGN ID . '[' INTEGER ']'
+   86 expresie: ID .
+
+    '['  shift, and go to state 195
+
+    $default  reduce using rule 86 (expresie)
+
+
+State 173
+
+   75 statement: ID '[' INTEGER ']' ASSIGN INTEGER .
+   87 expresie: INTEGER .
+
+    ';'       reduce using rule 75 (statement)
+    ';'       [reduce using rule 87 (expresie)]
+    ')'       reduce using rule 75 (statement)
+    ')'       [reduce using rule 87 (expresie)]
+    $default  reduce using rule 87 (expresie)
+
+
+State 174
+
+   78 statement: ID '[' INTEGER ']' ASSIGN BOOLEAN .
+
+    $default  reduce using rule 78 (statement)
+
+
+State 175
+
+   77 statement: ID '[' INTEGER ']' ASSIGN FLOAT .
+
+    $default  reduce using rule 77 (statement)
+
+
+State 176
+
+   76 statement: ID '[' INTEGER ']' ASSIGN '"' . STRING '"'
+
+    STRING  shift, and go to state 196
+
+
+State 177
+
+   79 statement: ID '[' INTEGER ']' ASSIGN expresie .
+   81 expresie: expresie . PLUS expresie
+   82         | expresie . MINUS expresie
+   83         | expresie . MULT expresie
+   84         | expresie . SUBT expresie
+
+    PLUS   shift, and go to state 114
+    MINUS  shift, and go to state 115
+    MULT   shift, and go to state 116
+    SUBT   shift, and go to state 117
+
+    $default  reduce using rule 79 (statement)
+
+
+State 178
+
+   89 control: IF '(' conditie ')' ELSE '{' . lista_instructiuni '}'
+
+    ID      shift, and go to state 37
+    TIP     shift, and go to state 179
+    STRUCT  shift, and go to state 180
+    IF      shift, and go to state 38
+    FOR     shift, and go to state 39
+    WHILE   shift, and go to state 40
+    CONST   shift, and go to state 181
+    ARRAY   shift, and go to state 182
+
+    declaratii_in_functie  go to state 183
+    lista_instructiuni     go to state 197
+    lista_statement        go to state 185
+    statement              go to state 44
+    control                go to state 45
+    lista_control          go to state 186
+
+
+State 179
+
+   20 declaratii_in_functie: TIP . ID ';'
+   23                      | TIP . ID '(' ')' ';'
+
+    ID  shift, and go to state 198
+
+
+State 180
+
+   22 declaratii_in_functie: STRUCT . ID '{' declaratii_in_functie '}'
+
+    ID  shift, and go to state 199
+
+
+State 181
+
+   21 declaratii_in_functie: CONST . TIP ID ';'
+
+    TIP  shift, and go to state 200
+
+
+State 182
+
+   24 declaratii_in_functie: ARRAY . LT TIP ',' INTEGER GT ID ';'
+
+    LT  shift, and go to state 201
+
+
+State 183
+
+   51 lista_instructiuni: declaratii_in_functie .
+
+    $default  reduce using rule 51 (lista_instructiuni)
+
+
+State 184
+
+   52 lista_instructiuni: lista_instructiuni . lista_control
+   53                   | lista_instructiuni . lista_statement
+   54                   | lista_instructiuni . declaratii_in_functie
+   88 control: IF '(' conditie ')' '{' lista_instructiuni . '}'
+
+    ID      shift, and go to state 37
+    TIP     shift, and go to state 179
+    STRUCT  shift, and go to state 180
+    IF      shift, and go to state 38
+    FOR     shift, and go to state 39
+    WHILE   shift, and go to state 40
+    CONST   shift, and go to state 181
+    ARRAY   shift, and go to state 182
+    '}'     shift, and go to state 202
+
+    declaratii_in_functie  go to state 203
+    lista_statement        go to state 204
+    statement              go to state 44
+    control                go to state 45
+    lista_control          go to state 205
+
+
+State 185
+
+   50 lista_instructiuni: lista_statement .
+   62 lista_statement: lista_statement . statement ';'
+
+    ID  shift, and go to state 37
+
+    ID        [reduce using rule 50 (lista_instructiuni)]
+    $default  reduce using rule 50 (lista_instructiuni)
+
+    statement  go to state 71
+
+
+State 186
+
+   49 lista_instructiuni: lista_control .
+   93 lista_control: lista_control . control
+
+    IF     shift, and go to state 38
+    FOR    shift, and go to state 39
+    WHILE  shift, and go to state 40
+
+    IF        [reduce using rule 49 (lista_instructiuni)]
+    FOR       [reduce using rule 49 (lista_instructiuni)]
+    WHILE     [reduce using rule 49 (lista_instructiuni)]
+    $default  reduce using rule 49 (lista_instructiuni)
+
+    control  go to state 73
+
+
+State 187
+
+   90 control: FOR '(' statement ';' conditie ';' . statement ')' '{' lista_instructiuni '}'
+
+    ID  shift, and go to state 37
+
+    statement  go to state 206
+
+
+State 188
+
+   52 lista_instructiuni: lista_instructiuni . lista_control
+   53                   | lista_instructiuni . lista_statement
+   54                   | lista_instructiuni . declaratii_in_functie
+   91 control: WHILE '(' conditie ')' '{' lista_instructiuni . '}'
+
+    ID      shift, and go to state 37
+    TIP     shift, and go to state 179
+    STRUCT  shift, and go to state 180
+    IF      shift, and go to state 38
+    FOR     shift, and go to state 39
+    WHILE   shift, and go to state 40
+    CONST   shift, and go to state 181
+    ARRAY   shift, and go to state 182
+    '}'     shift, and go to state 207
+
+    declaratii_in_functie  go to state 203
+    lista_statement        go to state 204
+    statement              go to state 44
+    control                go to state 45
+    lista_control          go to state 205
+
+
+State 189
+
+   48 bloc_functie: '{' . lista_instructiuni '}'
+
+    ID      shift, and go to state 37
+    TIP     shift, and go to state 179
+    STRUCT  shift, and go to state 180
+    IF      shift, and go to state 38
+    FOR     shift, and go to state 39
+    WHILE   shift, and go to state 40
+    CONST   shift, and go to state 181
+    ARRAY   shift, and go to state 182
+
+    declaratii_in_functie  go to state 183
+    lista_instructiuni     go to state 208
+    lista_statement        go to state 185
+    statement              go to state 44
+    control                go to state 45
+    lista_control          go to state 186
+
+
+State 190
+
+   46 functie: FUNCTION TIP ID '(' lista_param_functii_definite ')' bloc_functie .
+
+    $default  reduce using rule 46 (functie)
+
+
+State 191
+
+   26 lista_param_functii_definite: lista_param_functii_definite ',' param_fd .
+
+    $default  reduce using rule 26 (lista_param_functii_definite)
+
+
+State 192
+
+   17 declaratie_struct: ARRAY LT TIP ',' INTEGER GT ID .
+
+    $default  reduce using rule 17 (declaratie_struct)
+
+
+State 193
+
+   69 statement: ID '.' ID ASSIGN ID '.' ID .
+
+    $default  reduce using rule 69 (statement)
+
+
+State 194
+
+   73 statement: ID '.' ID ASSIGN '"' STRING '"' .
+
+    $default  reduce using rule 73 (statement)
+
+
+State 195
+
+   74 statement: ID '[' INTEGER ']' ASSIGN ID '[' . INTEGER ']'
+
+    INTEGER  shift, and go to state 209
+
+
+State 196
+
+   76 statement: ID '[' INTEGER ']' ASSIGN '"' STRING . '"'
+
+    '"'  shift, and go to state 210
+
+
+State 197
+
+   52 lista_instructiuni: lista_instructiuni . lista_control
+   53                   | lista_instructiuni . lista_statement
+   54                   | lista_instructiuni . declaratii_in_functie
+   89 control: IF '(' conditie ')' ELSE '{' lista_instructiuni . '}'
+
+    ID      shift, and go to state 37
+    TIP     shift, and go to state 179
+    STRUCT  shift, and go to state 180
+    IF      shift, and go to state 38
+    FOR     shift, and go to state 39
+    WHILE   shift, and go to state 40
+    CONST   shift, and go to state 181
+    ARRAY   shift, and go to state 182
+    '}'     shift, and go to state 211
+
+    declaratii_in_functie  go to state 203
+    lista_statement        go to state 204
+    statement              go to state 44
+    control                go to state 45
+    lista_control          go to state 205
+
+
+State 198
+
+   20 declaratii_in_functie: TIP ID . ';'
+   23                      | TIP ID . '(' ')' ';'
+
+    ';'  shift, and go to state 212
+    '('  shift, and go to state 213
+
+
+State 199
+
+   22 declaratii_in_functie: STRUCT ID . '{' declaratii_in_functie '}'
+
+    '{'  shift, and go to state 214
+
+
+State 200
+
+   21 declaratii_in_functie: CONST TIP . ID ';'
+
+    ID  shift, and go to state 215
+
+
+State 201
+
+   24 declaratii_in_functie: ARRAY LT . TIP ',' INTEGER GT ID ';'
+
+    TIP  shift, and go to state 216
+
+
+State 202
+
+   88 control: IF '(' conditie ')' '{' lista_instructiuni '}' .
+
+    $default  reduce using rule 88 (control)
+
+
+State 203
+
+   54 lista_instructiuni: lista_instructiuni declaratii_in_functie .
+
+    $default  reduce using rule 54 (lista_instructiuni)
+
+
+State 204
+
+   53 lista_instructiuni: lista_instructiuni lista_statement .
+   62 lista_statement: lista_statement . statement ';'
+
+    ID  shift, and go to state 37
+
+    ID        [reduce using rule 53 (lista_instructiuni)]
+    $default  reduce using rule 53 (lista_instructiuni)
+
+    statement  go to state 71
+
+
+State 205
+
+   52 lista_instructiuni: lista_instructiuni lista_control .
+   93 lista_control: lista_control . control
+
+    IF     shift, and go to state 38
+    FOR    shift, and go to state 39
+    WHILE  shift, and go to state 40
+
+    IF        [reduce using rule 52 (lista_instructiuni)]
+    FOR       [reduce using rule 52 (lista_instructiuni)]
+    WHILE     [reduce using rule 52 (lista_instructiuni)]
+    $default  reduce using rule 52 (lista_instructiuni)
+
+    control  go to state 73
+
+
+State 206
+
+   90 control: FOR '(' statement ';' conditie ';' statement . ')' '{' lista_instructiuni '}'
+
+    ')'  shift, and go to state 217
+
+
+State 207
+
+   91 control: WHILE '(' conditie ')' '{' lista_instructiuni '}' .
+
+    $default  reduce using rule 91 (control)
+
+
+State 208
+
+   48 bloc_functie: '{' lista_instructiuni . '}'
+   52 lista_instructiuni: lista_instructiuni . lista_control
+   53                   | lista_instructiuni . lista_statement
+   54                   | lista_instructiuni . declaratii_in_functie
+
+    ID      shift, and go to state 37
+    TIP     shift, and go to state 179
+    STRUCT  shift, and go to state 180
+    IF      shift, and go to state 38
+    FOR     shift, and go to state 39
+    WHILE   shift, and go to state 40
+    CONST   shift, and go to state 181
+    ARRAY   shift, and go to state 182
+    '}'     shift, and go to state 218
+
+    declaratii_in_functie  go to state 203
+    lista_statement        go to state 204
+    statement              go to state 44
+    control                go to state 45
+    lista_control          go to state 205
+
+
+State 209
+
+   74 statement: ID '[' INTEGER ']' ASSIGN ID '[' INTEGER . ']'
+
+    ']'  shift, and go to state 219
+
+
+State 210
+
+   76 statement: ID '[' INTEGER ']' ASSIGN '"' STRING '"' .
+
+    $default  reduce using rule 76 (statement)
+
+
+State 211
+
+   89 control: IF '(' conditie ')' ELSE '{' lista_instructiuni '}' .
+
+    $default  reduce using rule 89 (control)
+
+
+State 212
+
+   20 declaratii_in_functie: TIP ID ';' .
+
+    $default  reduce using rule 20 (declaratii_in_functie)
+
+
+State 213
+
+   23 declaratii_in_functie: TIP ID '(' . ')' ';'
+
+    ')'  shift, and go to state 220
+
+
+State 214
+
+   22 declaratii_in_functie: STRUCT ID '{' . declaratii_in_functie '}'
+
+    TIP     shift, and go to state 179
+    STRUCT  shift, and go to state 180
+    CONST   shift, and go to state 181
+    ARRAY   shift, and go to state 182
+
+    declaratii_in_functie  go to state 221
+
+
+State 215
+
+   21 declaratii_in_functie: CONST TIP ID . ';'
+
+    ';'  shift, and go to state 222
+
+
+State 216
+
+   24 declaratii_in_functie: ARRAY LT TIP . ',' INTEGER GT ID ';'
+
+    ','  shift, and go to state 223
+
+
+State 217
+
+   90 control: FOR '(' statement ';' conditie ';' statement ')' . '{' lista_instructiuni '}'
+
+    '{'  shift, and go to state 224
+
+
+State 218
+
+   48 bloc_functie: '{' lista_instructiuni '}' .
+
+    $default  reduce using rule 48 (bloc_functie)
+
+
+State 219
+
+   74 statement: ID '[' INTEGER ']' ASSIGN ID '[' INTEGER ']' .
+
+    $default  reduce using rule 74 (statement)
+
+
+State 220
+
+   23 declaratii_in_functie: TIP ID '(' ')' . ';'
+
+    ';'  shift, and go to state 225
+
+
+State 221
+
+   22 declaratii_in_functie: STRUCT ID '{' declaratii_in_functie . '}'
+
+    '}'  shift, and go to state 226
+
+
+State 222
+
+   21 declaratii_in_functie: CONST TIP ID ';' .
+
+    $default  reduce using rule 21 (declaratii_in_functie)
+
+
+State 223
+
+   24 declaratii_in_functie: ARRAY LT TIP ',' . INTEGER GT ID ';'
+
+    INTEGER  shift, and go to state 227
+
+
+State 224
+
+   90 control: FOR '(' statement ';' conditie ';' statement ')' '{' . lista_instructiuni '}'
+
+    ID      shift, and go to state 37
+    TIP     shift, and go to state 179
+    STRUCT  shift, and go to state 180
+    IF      shift, and go to state 38
+    FOR     shift, and go to state 39
+    WHILE   shift, and go to state 40
+    CONST   shift, and go to state 181
+    ARRAY   shift, and go to state 182
+
+    declaratii_in_functie  go to state 183
+    lista_instructiuni     go to state 228
+    lista_statement        go to state 185
+    statement              go to state 44
+    control                go to state 45
+    lista_control          go to state 186
+
+
+State 225
+
+   23 declaratii_in_functie: TIP ID '(' ')' ';' .
+
+    $default  reduce using rule 23 (declaratii_in_functie)
+
+
+State 226
+
+   22 declaratii_in_functie: STRUCT ID '{' declaratii_in_functie '}' .
+
+    $default  reduce using rule 22 (declaratii_in_functie)
+
+
+State 227
+
+   24 declaratii_in_functie: ARRAY LT TIP ',' INTEGER . GT ID ';'
+
+    GT  shift, and go to state 229
+
+
+State 228
+
+   52 lista_instructiuni: lista_instructiuni . lista_control
+   53                   | lista_instructiuni . lista_statement
+   54                   | lista_instructiuni . declaratii_in_functie
+   90 control: FOR '(' statement ';' conditie ';' statement ')' '{' lista_instructiuni . '}'
+
+    ID      shift, and go to state 37
+    TIP     shift, and go to state 179
+    STRUCT  shift, and go to state 180
+    IF      shift, and go to state 38
+    FOR     shift, and go to state 39
+    WHILE   shift, and go to state 40
+    CONST   shift, and go to state 181
+    ARRAY   shift, and go to state 182
+    '}'     shift, and go to state 230
+
+    declaratii_in_functie  go to state 203
+    lista_statement        go to state 204
+    statement              go to state 44
+    control                go to state 45
+    lista_control          go to state 205
+
+
+State 229
+
+   24 declaratii_in_functie: ARRAY LT TIP ',' INTEGER GT . ID ';'
+
+    ID  shift, and go to state 231
+
+
+State 230
+
+   90 control: FOR '(' statement ';' conditie ';' statement ')' '{' lista_instructiuni '}' .
+
+    $default  reduce using rule 90 (control)
+
+
+State 231
+
+   24 declaratii_in_functie: ARRAY LT TIP ',' INTEGER GT ID . ';'
+
+    ';'  shift, and go to state 232
+
+
+State 232
+
+   24 declaratii_in_functie: ARRAY LT TIP ',' INTEGER GT ID ';' .
+
+    $default  reduce using rule 24 (declaratii_in_functie)

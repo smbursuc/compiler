@@ -5,12 +5,9 @@ integer b(integer a);
 structure g{integer k; integer u;};
 structure t{integer w;};
 main
-{   p(10);
-    i9 <- 1;
-    i1 <- 10;
-    b(8000,90);
-    b(8000);
-    o9(2);
+{   
+    a(10,90,100);
+    print(90+100-5);
 }
 function integer c(integer d)
 {

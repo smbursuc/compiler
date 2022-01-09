@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdarg.h>
+#include <math.h>
 #define maxVarNR 1024
 #define maxParametriFunctie 20
 union tipuri_variabile
@@ -23,14 +24,12 @@ struct variabila
     char localglobal[30];
 };
 
-
 struct structura
 {
     char id[30];
     struct variabila variabile_declarate_in_struct[100];
     int nr_variabile_declarate_struct;
 };
-
 
 struct functie
 {
@@ -71,12 +70,74 @@ int nr_curent_atribuiri_main = 0;
 int nr_curent_structuri = 0;
 int param_nr = 0;
 
-const char* globalvariable_format = "(%s, %s, %s)\n";
-const char* localvariable_format = "(%s, %s, %s, %s)\n";
-const char* function_format = "(%s, %s, %s)\n";
+const char *globalvariable_format = "(%s, %s, %s, %s)\n";
+const char *localvariable_format = "(%s, %s, %s, %s)\n";
+const char *function_format = "(%s, %s, %s)\n";
 
 char buffer[100];
 char buf[30];
+
+struct eroare
+{
+    char mesaj[1000];
+    int linie;
+};
+
+struct erori
+{
+    struct eroare error_list[500];
+    int nrErori;
+}erori_aflate_la_compilare;
+
+typedef enum
+{
+    operator,
+    id,
+    numar,
+    element_array,
+    undefined
+} tip;
+
+struct nod
+{
+    tip type;
+    char *valoare;
+    struct nod *stanga;
+    struct nod *dreapta;
+};
+
+struct nod *buildAST(char *valoare, struct nod *stanga, struct nod *dreapta, tip type)
+{
+    struct nod *nod = (struct nod *)malloc(sizeof(struct nod));
+    nod->valoare = valoare;
+    nod->stanga = stanga;
+    nod->dreapta = dreapta;
+    nod->type = type;
+    return (nod);
+}
+
+int evalAST(struct nod *root)
+{
+    if (root == NULL)
+        return 0;
+    if (root->type == numar)
+        return atoi(root->valoare);
+    if (root->type == operator)
+    {
+        if (strcmp(root->valoare, "+") == 0)
+            return evalAST(root->stanga) + evalAST(root->dreapta);
+        if (strcmp(root->valoare, "-") == 0)
+            return evalAST(root->stanga) - evalAST(root->dreapta);
+        if (strcmp(root->valoare, "*") == 0)
+            return evalAST(root->stanga) * evalAST(root->dreapta);
+        if (strcmp(root->valoare, "/") == 0)
+            return evalAST(root->stanga) / evalAST(root->dreapta);
+        if (strcmp(root->valoare, "^") == 0)
+            return pow(evalAST(root->stanga), evalAST(root->dreapta));
+    }
+    return 0;
+}
+
 void add_functie_main(char *id, int linie)
 {
     strcpy(functii_in_main[nr_curent_functii_main - 1].id, id);
@@ -216,17 +277,17 @@ void adauga_variabila(char *identifier, char *tip, char *id, char *valoare, int 
     variabile[nr_curent_var].linie = linie;
     nr_curent_var++;
 }
-void adauga_variabile_struct(char *tip, char*id, char *valoare, int linie)
-{  
-    strcpy(structuri[nr_curent_structuri].variabile_declarate_in_struct[structuri[nr_curent_structuri].nr_variabile_declarate_struct].valoare,valoare);
-    strcpy(structuri[nr_curent_structuri].variabile_declarate_in_struct[structuri[nr_curent_structuri].nr_variabile_declarate_struct].tip,tip);
-    strcpy(structuri[nr_curent_structuri].variabile_declarate_in_struct[structuri[nr_curent_structuri].nr_variabile_declarate_struct].id,id);
+void adauga_variabile_struct(char *tip, char *id, char *valoare, int linie)
+{
+    strcpy(structuri[nr_curent_structuri].variabile_declarate_in_struct[structuri[nr_curent_structuri].nr_variabile_declarate_struct].valoare, valoare);
+    strcpy(structuri[nr_curent_structuri].variabile_declarate_in_struct[structuri[nr_curent_structuri].nr_variabile_declarate_struct].tip, tip);
+    strcpy(structuri[nr_curent_structuri].variabile_declarate_in_struct[structuri[nr_curent_structuri].nr_variabile_declarate_struct].id, id);
     structuri[nr_curent_structuri].nr_variabile_declarate_struct++;
 }
 
-void adauga_struct(char* id)
+void adauga_struct(char *id)
 {
-    strcpy(structuri[nr_curent_structuri-1].id,id);
+    strcpy(structuri[nr_curent_structuri - 1].id, id);
 }
 void adauga_variabile_main(char *id, int linie)
 {
@@ -383,53 +444,89 @@ char *itochar(int x)
     return buf;
 }
 
-void verifica_ca_asignarile_sa_fie_corecte()
+void adauga_eroare(char* mesaj,int linie)
 {
+    strcpy(erori_aflate_la_compilare.error_list[erori_aflate_la_compilare.nrErori].mesaj,mesaj);
+    erori_aflate_la_compilare.error_list[erori_aflate_la_compilare.nrErori].linie=linie;
+    erori_aflate_la_compilare.nrErori++;
 }
 
+void afiseaza_erori_luate_la_compilare()
+{
+    for(int i=0;i<erori_aflate_la_compilare.nrErori;i++)
+    {
+        printf("%s\n",erori_aflate_la_compilare.error_list[i].mesaj);
+    }
+
+}
 void check_errors()
 {
     verifica_daca_functiile_apelate_sunt_declarate();
     verifica_daca_variabilele_sunt_declarate();
     verifica_daca_2_variabile_sunt_declarate_la_fel();
     verifica_daca_2_functii_au_aceeasi_semnatura();
-    verifica_ca_asignarile_sa_fie_corecte();
+    afiseaza_erori_luate_la_compilare();
 }
 void symbol_table()
 {
-    FILE* file;
-    file=fopen("symbol_table.txt","w+");
+    FILE *file;
+    file = fopen("symbol_table.txt", "w+");
     for (int i = 0; i < nr_curent_var; i++)
-        fprintf(file,globalvariable_format,variabile[i].id,variabile[i].tip,variabile[i].localglobal);
-    fprintf(file,"\n");
+        fprintf(file, globalvariable_format, variabile[i].id, variabile[i].tip, variabile[i].localglobal, variabile[i].valoare);
+    fprintf(file, "\n");
     for (int i = 0; i < nr_curent_functii_definite; i++)
     {
         for (int j = 0; j < functii_definite[i].nr_variabile_declarate; j++)
         {
-            fprintf(file,localvariable_format, functii_definite[i].variabile_declarate[j].id, functii_definite[i].variabile_declarate[j].tip, functii_definite[i].variabile_declarate[j].localglobal, functii_definite[i].id);
+            fprintf(file, localvariable_format, functii_definite[i].variabile_declarate[j].id, functii_definite[i].variabile_declarate[j].tip, functii_definite[i].variabile_declarate[j].localglobal, functii_definite[i].id);
         }
     }
-fprintf(file,"\n");
+    fprintf(file, "\n");
     for (int i = 0; i < nr_curent_functii; i++)
     {
-        fprintf(file,"(%s %s,", functii[i].id, functii[i].tip);
+        fprintf(file, "(%s %s,", functii[i].id, functii[i].tip);
         for (int j = 0; j < functii[i].nr_argumente; j++)
         {
-            fprintf(file," %s %s", functii[i].argumente_functie[j].tip, functii[i].argumente_functie[j].id);
+            fprintf(file, " %s %s", functii[i].argumente_functie[j].tip, functii[i].argumente_functie[j].id);
         }
-        fprintf(file,")");
-        fprintf(file,"\n");
+        fprintf(file, ")");
+        fprintf(file, "\n");
     }
-    fprintf(file,"\n");
+    fprintf(file, "\n");
 
-    for (int i=0; i < nr_curent_structuri; i++)
-        {   fprintf(file,"(");
-            fprintf(file,"%s struct,", structuri[i].id);
-            for(int j=0; j < structuri[i].nr_variabile_declarate_struct; j++)
-                fprintf(file," %s %s", structuri[i].variabile_declarate_in_struct[j].tip,structuri[i].variabile_declarate_in_struct[j].id);
-        fprintf(file,")");
-        fprintf(file,"\n");
+    for (int i = 0; i < nr_curent_structuri; i++)
+    {
+        fprintf(file, "(");
+        fprintf(file, "%s struct,", structuri[i].id);
+        for (int j = 0; j < structuri[i].nr_variabile_declarate_struct; j++)
+            fprintf(file, " %s %s", structuri[i].variabile_declarate_in_struct[j].tip, structuri[i].variabile_declarate_in_struct[j].id);
+        fprintf(file, ")");
+        fprintf(file, "\n");
+    }
+}
+
+void update_valoare(char* id,char* valoare)
+{
+    for(int i=0;i<nr_curent_var;i++)
+    {
+        if(strcmp(variabile[i].id,id) == 0)
+        {
+            strcpy(variabile[i].valoare,valoare);
+            break;
         }
+    }
+}
+
+char* get_value(char* id)
+{
+    for(int i=0;i<nr_curent_var;i++)
+    {
+        if(strcmp(variabile[i].id,id) == 0)
+        {
+            return variabile[i].valoare;
+        }
+    }
+    return NULL;
 }
 
 void print_variabile_din_functii_definite()
@@ -455,7 +552,6 @@ void print_functii_definite()
     {
         printf("%s %s\n", functii_definite[i].id, functii_definite[i].tip);
     }
-
 }
 void print_info()
 {
