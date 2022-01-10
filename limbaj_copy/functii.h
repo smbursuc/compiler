@@ -32,7 +32,7 @@ struct structura
     int nr_variabile_declarate_struct;
 };
 struct array
-{   
+{
     char id[30];
     char tip[30];
     char dimensiune[30];
@@ -101,7 +101,7 @@ struct erori
 {
     struct eroare error_list[500];
     int nrErori;
-}erori_aflate_la_compilare;
+} erori_aflate_la_compilare;
 
 typedef enum
 {
@@ -191,8 +191,9 @@ void add_functie_definite(char *tip, char *id, int linie)
 
 void add_parametru_functie_definita(char *id, char *tip)
 {
-    strcpy(functii_definite[nr_curent_functii_definite].argumente_functie[nr_curent_functii_definite].id, id);
-    strcpy(functii_definite[nr_curent_functii_definite].argumente_functie[nr_curent_functii_definite].tip, tip);
+    //printf("%d\n",nr_curent_functii_definite);
+    strcpy(functii_definite[nr_curent_functii_definite].argumente_functie[functii_definite[nr_curent_functii_definite].nr_argumente].id, id);
+    strcpy(functii_definite[nr_curent_functii_definite].argumente_functie[functii_definite[nr_curent_functii_definite].nr_argumente].tip, tip);
 }
 
 void add_variabila_functie_definita(char *qualifier, char *tip, char *id, char *valoare, int linie, char *localglobal)
@@ -226,32 +227,33 @@ void verifica_daca_2_functii_au_aceeasi_semnatura()
         for (int j = 0; j < nr_curent_functii; j++)
         {
             if (i != j)
-            {   
+            {
                 //printf("%s %s %s %s\n",functii[i].tip,functii[j].tip,functii[i].id,functii[j].id);
                 if (strcmp(functii[i].tip, functii[j].tip) == 0 && strcmp(functii[i].id, functii[j].id) == 0 && i > j)
-                {   
+                {
                     int diferit = 0;
                     //printf("%d %d\n",functii[i].nr_argumente,functii[j].nr_argumente);
                     int maxim = functii[i].nr_argumente > functii[j].nr_argumente ? functii[i].nr_argumente : functii[j].nr_argumente;
                     for (int k = 0; k < maxim; k++)
-                    {   
+                    {
                         //printf("%s %s %d\n",functii[i].argumente_functie[k].tip,functii[j].argumente_functie[k].tip,maxim);
                         if (strcmp(functii[i].argumente_functie[k].tip, functii[j].argumente_functie[k].tip))
-                            {diferit = 1;
-                    }
-                    if (!diferit)
-                    {
-                        sprintf(mesaj, "Redeclarare functie \"%s\" (linia %d)\n", functii[i].id, functii[i].linie);
-                        strcpy(error_list[error_list_nr++], mesaj);
+                        {
+                            diferit = 1;
+                        }
+                        if (!diferit)
+                        {
+                            sprintf(mesaj, "Redeclarare functie \"%s\" (linia %d)\n", functii[i].id, functii[i].linie);
+                            strcpy(error_list[error_list_nr++], mesaj);
+                        }
                     }
                 }
             }
         }
-    }
-    for (int i = 0; i < error_list_nr - 1; i++)
-    {
-        printf("%s", error_list[i]);
-    }
+        for (int i = 0; i < error_list_nr - 1; i++)
+        {
+            printf("%s", error_list[i]);
+        }
     }
 }
 void verifica_daca_2_variabile_sunt_declarate_la_fel()
@@ -266,7 +268,7 @@ void verifica_daca_2_variabile_sunt_declarate_la_fel()
         for (int j = 0; j < nr_curent_var; j++)
         {
             if (i != j)
-            {   
+            {
                 if (strcmp(variabile[i].id, variabile[j].id) == 0 && strcmp(variabile[i].tip, variabile[j].tip) == 0 && i > j)
                 {
                     sprintf(mesaj, "Redeclarare variabilei \"%s\" (linia %d)\n", variabile[i].id, variabile[i].linie);
@@ -301,10 +303,10 @@ void adauga_variabile_struct(char *tip, char *id, char *valoare, int linie)
 }
 
 void adauga_struct(char *id, int linie)
-{   
+{
     strcpy(structuri[nr_curent_structuri - 1].id, id);
-    strcpy(variabile[nr_curent_var].id,id);
-    strcpy(variabile[nr_curent_var].tip,"struct");
+    strcpy(variabile[nr_curent_var].id, id);
+    strcpy(variabile[nr_curent_var].tip, "struct");
     variabile[nr_curent_var].linie = linie;
     nr_curent_var++;
 }
@@ -373,22 +375,22 @@ void verifica_daca_variabilele_sunt_declarate()
     }
 }
 
-int vericica_daca_struct_este_declarat(char*id_struct,char*id_var)
-{   for(int i=0;i<nr_curent_structuri;i++)
-        if(strcmp(structuri[i].id,id_struct)==0)
-            for(int j=0;j<structuri[i].nr_variabile_declarate_struct;j++)
-                if(strcmp(structuri[i].variabile_declarate_in_struct[j].id,id_var)==0)
+int vericica_daca_struct_este_declarat(char *id_struct, char *id_var)
+{
+    for (int i = 0; i < nr_curent_structuri; i++)
+        if (strcmp(structuri[i].id, id_struct) == 0)
+            for (int j = 0; j < structuri[i].nr_variabile_declarate_struct; j++)
+                if (strcmp(structuri[i].variabile_declarate_in_struct[j].id, id_var) == 0)
                     return 1;
     return 0;
 }
 
-int vericica_daca_array_este_declarat(char*id_array)
+int vericica_daca_array_este_declarat(char *id_array)
 {
-    for(int i=0; i<nr_curent_arrays;i++)
-        if(strcmp(arrays[i].id,id_array)==0)
+    for (int i = 0; i < nr_curent_arrays; i++)
+        if (strcmp(arrays[i].id, id_array) == 0)
             return 1;
     return 0;
-
 }
 
 char *ia_tip(char *id)
@@ -402,30 +404,28 @@ char *ia_tip(char *id)
     }
     return "";
 }
-char *ia_tip_struct(char *id_struct, char* id_var)
+char *ia_tip_struct(char *id_struct, char *id_var)
 {
-    for(int i=0;i<nr_curent_structuri;i++)
-        {
-            if(strcmp(structuri[i].id,id_struct)==0)
-                for (int j = 0; j < structuri[i].nr_variabile_declarate_struct; j++)
-                    if(strcmp(structuri[i].variabile_declarate_in_struct[j].id,id_var)==0)
-                        {
-                            return structuri[i].variabile_declarate_in_struct[j].tip;
-                        }
-
-                
-        }
+    for (int i = 0; i < nr_curent_structuri; i++)
+    {
+        if (strcmp(structuri[i].id, id_struct) == 0)
+            for (int j = 0; j < structuri[i].nr_variabile_declarate_struct; j++)
+                if (strcmp(structuri[i].variabile_declarate_in_struct[j].id, id_var) == 0)
+                {
+                    return structuri[i].variabile_declarate_in_struct[j].tip;
+                }
+    }
     return "";
 }
 
-char *ia_tip_array(char*id_array)
-{   
-    for(int i=0; i<nr_curent_arrays; i++)
-        {
-            if(strcmp(arrays[i].id, id_array)==0)
-                return arrays[i].tip;
-        }
-        return "";
+char *ia_tip_array(char *id_array)
+{
+    for (int i = 0; i < nr_curent_arrays; i++)
+    {
+        if (strcmp(arrays[i].id, id_array) == 0)
+            return arrays[i].tip;
+    }
+    return "";
 }
 void print_functii()
 {
@@ -462,11 +462,12 @@ void verifica_daca_functiile_apelate_sunt_declarate()
     char mesaj[200];
     int error_list_nr = 0;
     strcpy(mesaj, "");
+    int gasit = 0;
+    int i_i = 0;
     for (int i = 0; i < nr_curent_functii_main; i++)
     {
         if (strlen(functii_in_main[i].id) > 0)
         {
-            int gasit = 0;
             for (int j = 0; j < nr_curent_functii; j++)
             {
 
@@ -474,24 +475,27 @@ void verifica_daca_functiile_apelate_sunt_declarate()
                 if (strcmp(functii_in_main[i].id, functii[j].id) == 0)
                 {
                     int diferit = 0;
-                    //printf("%d %d\n",functii[i].nr_argumente,functii[j].nr_argumente);
-                    int maxim = functii_in_main[i].nr_argumente > functii[j].nr_argumente ? functii_in_main[i].nr_argumente : functii[j].nr_argumente;
+                    //printf("%d %d\n",functii_in_main[i].nr_argumente,functii[j].nr_argumente);
+                    int maxim = functii_in_main[i].nr_argumente-1 > functii[j].nr_argumente ? functii_in_main[i].nr_argumente-1 : functii[j].nr_argumente;
                     for (int k = 0; k < maxim; k++)
                     {
-                        //printf("%s %s %d\n",functii[i].argumente_functie[k].tip,functii[j].argumente_functie[k].tip,maxim);
+                        //printf("%s %s %d\n", functii_in_main[i].argumente_functie[k].tip, functii[j].argumente_functie[k].tip, maxim);
                         if (strcmp(functii_in_main[i].argumente_functie[k].tip, functii[j].argumente_functie[k].tip))
                             diferit = 1;
                     }
                     if (!diferit)
+                    {
                         gasit = 1;
+                        i_i = i;
+                    }
                 }
             }
-            if (!gasit)
-            {
-                sprintf(mesaj, "Functia \"%s\" nu a fost declarata (linia %d)\n", functii_in_main[i].id, functii_in_main[i].linie);
-                strcpy(error_list[error_list_nr++], mesaj);
-            }
         }
+    }
+    if (!gasit)
+    {
+        sprintf(mesaj, "Functia \"%s\" nu a fost declarata (linia %d)\n", functii_in_main[i_i].id, functii_in_main[i_i].linie);
+        strcpy(error_list[error_list_nr++], mesaj);
     }
     for (int i = 0; i < error_list_nr; i++)
     {
@@ -505,35 +509,26 @@ char *itochar(int x)
     return buf;
 }
 
-void adauga_eroare(char* mesaj,int linie)
+void adauga_eroare(char *mesaj, int linie)
 {
-    strcpy(erori_aflate_la_compilare.error_list[erori_aflate_la_compilare.nrErori].mesaj,mesaj);
-    erori_aflate_la_compilare.error_list[erori_aflate_la_compilare.nrErori].linie=linie;
+    strcpy(erori_aflate_la_compilare.error_list[erori_aflate_la_compilare.nrErori].mesaj, mesaj);
+    erori_aflate_la_compilare.error_list[erori_aflate_la_compilare.nrErori].linie = linie;
     erori_aflate_la_compilare.nrErori++;
 }
 
 void afiseaza_erori_luate_la_compilare()
 {
-    for(int i=0;i<erori_aflate_la_compilare.nrErori;i++)
+    for (int i = 0; i < erori_aflate_la_compilare.nrErori; i++)
     {
-        printf("%s\n",erori_aflate_la_compilare.error_list[i].mesaj);
+        printf("%s\n", erori_aflate_la_compilare.error_list[i].mesaj);
     }
-
-}
-void check_errors()
-{
-    verifica_daca_functiile_apelate_sunt_declarate();
-    verifica_daca_variabilele_sunt_declarate();
-    verifica_daca_2_variabile_sunt_declarate_la_fel();
-    verifica_daca_2_functii_au_aceeasi_semnatura();
-    afiseaza_erori_luate_la_compilare();
 }
 void symbol_table()
 {
     FILE *file;
     FILE *file2;
     file = fopen("symbol_table.txt", "w+");
-    file2 = fopen("symbol_table_f.txt","w+");
+    file2 = fopen("symbol_table_f.txt", "w+");
     for (int i = 0; i < nr_curent_var; i++)
         fprintf(file, globalvariable_format, variabile[i].id, variabile[i].tip, variabile[i].localglobal, variabile[i].valoare);
     fprintf(file, "\n");
@@ -569,114 +564,106 @@ void symbol_table()
 
     for (int i = 0; i < nr_curent_arrays; i++)
     {
-        fprintf(file, "(%s array, %s, %p)\n", arrays[i].id,arrays[i].tip, arrays[i].elemente);
+        fprintf(file, "(%s array, %s, %p)\n", arrays[i].id, arrays[i].tip, arrays[i].elemente);
     }
-
-
-
 }
 
-void adauga_array(char *tip,char*dimensiune, char*id,int linie)
-{   
-    strcpy(arrays[nr_curent_arrays-1].tip,tip);
-    strcpy(arrays[nr_curent_arrays-1].id,id);
-    strcpy(arrays[nr_curent_arrays-1].dimensiune,dimensiune);
-    if(strcmp(tip,"integer")==0)
-        arrays[nr_curent_arrays-1].elemente = (struct variabila*)malloc(sizeof(int)*atoi(dimensiune));
-    if(strcmp(tip,"string")==0)
-        arrays[nr_curent_arrays-1].elemente = (struct variabila*)malloc(sizeof(char)*atoi(dimensiune));
-    if(strcmp(tip,"boolean")==0)
-        arrays[nr_curent_arrays-1].elemente = (struct variabila*)malloc(sizeof(bool)*atoi(dimensiune));
-    if(strcmp(tip,"float")==0)
-        arrays[nr_curent_arrays-1].elemente = (struct variabila*)malloc(sizeof(float)*atoi(dimensiune));
-    strcpy(variabile[nr_curent_var].id,id);
-    strcpy(variabile[nr_curent_var].tip,"array");
-    variabile[nr_curent_var].linie = linie; 
+void adauga_array(char *tip, char *dimensiune, char *id, int linie)
+{
+    strcpy(arrays[nr_curent_arrays - 1].tip, tip);
+    strcpy(arrays[nr_curent_arrays - 1].id, id);
+    strcpy(arrays[nr_curent_arrays - 1].dimensiune, dimensiune);
+    if (strcmp(tip, "integer") == 0)
+        arrays[nr_curent_arrays - 1].elemente = (struct variabila *)malloc(sizeof(int) * atoi(dimensiune));
+    if (strcmp(tip, "string") == 0)
+        arrays[nr_curent_arrays - 1].elemente = (struct variabila *)malloc(sizeof(char) * atoi(dimensiune));
+    if (strcmp(tip, "boolean") == 0)
+        arrays[nr_curent_arrays - 1].elemente = (struct variabila *)malloc(sizeof(bool) * atoi(dimensiune));
+    if (strcmp(tip, "float") == 0)
+        arrays[nr_curent_arrays - 1].elemente = (struct variabila *)malloc(sizeof(float) * atoi(dimensiune));
+    strcpy(variabile[nr_curent_var].id, id);
+    strcpy(variabile[nr_curent_var].tip, "array");
+    variabile[nr_curent_var].linie = linie;
     nr_curent_var++;
-    
 }
 
-void update_element_array_index(char *id_array1, char *index_element1, char *id_array2,char *index_element2)
-{   
-    for(int i=0;i<nr_curent_arrays;i++)
-        {
-            if(strcmp(arrays[i].id, id_array1)==0)
-                for(int j=0;j<nr_curent_arrays;j++)
-                    if(strcmp(arrays[j].id, id_array2)==0)
-                        strcpy(arrays[i].elemente[atoi(index_element1)].valoare, arrays[j].elemente[atoi(index_element2)].valoare);           
-        }
+void update_element_array_index(char *id_array1, char *index_element1, char *id_array2, char *index_element2)
+{
+    for (int i = 0; i < nr_curent_arrays; i++)
+    {
+        if (strcmp(arrays[i].id, id_array1) == 0)
+            for (int j = 0; j < nr_curent_arrays; j++)
+                if (strcmp(arrays[j].id, id_array2) == 0)
+                    strcpy(arrays[i].elemente[atoi(index_element1)].valoare, arrays[j].elemente[atoi(index_element2)].valoare);
+    }
 }
 void update_element_array_value(char *id_array1, char *index_element1, char *value)
-{   
-    for(int i=0;i<nr_curent_arrays;i++)
+{
+    for (int i = 0; i < nr_curent_arrays; i++)
+    {
+        if (strcmp(arrays[i].id, id_array1) == 0)
         {
-            if(strcmp(arrays[i].id, id_array1)==0)
-                {
-                    strcpy(arrays[i].elemente[atoi(index_element1)].valoare,value);    
-                }
+            strcpy(arrays[i].elemente[atoi(index_element1)].valoare, value);
         }
+    }
 }
 
-
-
-void update_valoare(char* id,char* valoare)
+void update_valoare(char *id, char *valoare)
 {
-    for(int i=0;i<nr_curent_var;i++)
+    for (int i = 0; i < nr_curent_var; i++)
     {
-        if(strcmp(variabile[i].id,id) == 0)
+        if (strcmp(variabile[i].id, id) == 0)
         {
-            strcpy(variabile[i].valoare,valoare);
+            strcpy(variabile[i].valoare, valoare);
             break;
         }
     }
 }
 
-void update_valoare_struct(char *id_struct,char *id_variabila, char* valoare)
+void update_valoare_struct(char *id_struct, char *id_variabila, char *valoare)
 {
-    for(int i=0;i<nr_curent_structuri;i++)
-        {
-            if(strcmp(structuri[i].id,id_struct)==0)
-                for (int j = 0; j < structuri[i].nr_variabile_declarate_struct; j++)
-                    if(strcmp(structuri[i].variabile_declarate_in_struct[j].id,id_variabila)==0)
-                        {
-                            strcpy(structuri[i].variabile_declarate_in_struct[j].valoare, valoare);
-                            break;
-                        }
-
-        }
+    for (int i = 0; i < nr_curent_structuri; i++)
+    {
+        if (strcmp(structuri[i].id, id_struct) == 0)
+            for (int j = 0; j < structuri[i].nr_variabile_declarate_struct; j++)
+                if (strcmp(structuri[i].variabile_declarate_in_struct[j].id, id_variabila) == 0)
+                {
+                    strcpy(structuri[i].variabile_declarate_in_struct[j].valoare, valoare);
+                    break;
+                }
+    }
 }
 
-char* get_value(char* id)
+char *get_value(char *id)
 {
-    for(int i=0;i<nr_curent_var;i++)
+    for (int i = 0; i < nr_curent_var; i++)
     {
-        if(strcmp(variabile[i].id,id) == 0)
+        if (strcmp(variabile[i].id, id) == 0)
         {
             return variabile[i].valoare;
         }
     }
     return NULL;
 }
-char* get_value_struct(char* id_struct, char* id_var)
+char *get_value_struct(char *id_struct, char *id_var)
 {
-    for(int i=0;i<nr_curent_structuri;i++)
-        {
-            if(strcmp(structuri[i].id,id_struct)==0)
-                for (int j = 0; j < structuri[i].nr_variabile_declarate_struct; j++)
-                    if(strcmp(structuri[i].variabile_declarate_in_struct[j].id,id_var)==0)
-                        return structuri[i].variabile_declarate_in_struct[j].valoare;
-
-        }
+    for (int i = 0; i < nr_curent_structuri; i++)
+    {
+        if (strcmp(structuri[i].id, id_struct) == 0)
+            for (int j = 0; j < structuri[i].nr_variabile_declarate_struct; j++)
+                if (strcmp(structuri[i].variabile_declarate_in_struct[j].id, id_var) == 0)
+                    return structuri[i].variabile_declarate_in_struct[j].valoare;
+    }
 }
-char* get_value_array(char* id_array, char* index)
+char *get_value_array(char *id_array, char *index)
 {
-    for(int i=0;i<nr_curent_arrays;i++)
+    for (int i = 0; i < nr_curent_arrays; i++)
+    {
+        if (strcmp(arrays[i].id, id_array) == 0)
         {
-            if(strcmp(arrays[i].id,id_array)==0)
-                {
-                    return arrays[i].elemente[atoi(index)].valoare;
-                }
+            return arrays[i].elemente[atoi(index)].valoare;
         }
+    }
 }
 
 void print_variabile_din_functii_definite()
@@ -687,9 +674,10 @@ void print_variabile_din_functii_definite()
         {
             printf("%s %s %s ", functii_definite[i].variabile_declarate[j].tip, functii_definite[i].variabile_declarate[j].id, functii_definite[i].id);
         }
+        //printf("%d\n",functii_definite[i].nr_argumente);
         for (int k = 0; k < functii_definite[i].nr_argumente; k++)
         {
-            printf("%s %s ", functii_definite[i].argumente_functie[k].id, functii_definite[i].argumente_functie[k].tip);
+            printf("%s %s %d ", functii_definite[i].argumente_functie[k].id, functii_definite[i].argumente_functie[k].tip, k);
         }
         printf("\n");
     }
@@ -703,13 +691,75 @@ void print_functii_definite()
         printf("%s %s\n", functii_definite[i].id, functii_definite[i].tip);
     }
 }
+
+int ia_index_functie_definita(char *id)
+{
+    for (int i = 0; i < nr_curent_functii_definite; i++)
+    {
+        if (strcmp(functii_definite[i].id, id) == 0)
+            return i;
+    }
+    return 0;
+}
+
+void verifica_daca_functiile_definite_au_fost_declarata()
+{
+    for (int i = 0; i < nr_curent_functii; i++)
+    {
+        for (int j = 0; j < nr_curent_functii_definite; j++)
+        {
+            if (strcmp(functii[i].id, functii_definite[j].id) == 0)
+            {
+                int check = 1;
+                int maximum = functii[i].nr_argumente < functii_definite[j].nr_argumente ? functii_definite[j].nr_argumente : functii[i].nr_argumente;
+                //printf("%d\n", maximum);
+                for (int k = 0; k < maximum; k++)
+                {
+                    //printf("%s\n", functii[i].argumente_functie[k].tip);
+                    //printf("%s\n", functii_definite[j].argumente_functie[k].id);
+                    if (strcmp(functii[i].argumente_functie[k].tip, functii_definite[j].argumente_functie[k].id))
+                    {
+                        check = 0;
+                    }
+                }
+                if (!check)
+                {
+                    printf("\"%s\" nu a fost declarata (linia %d)\n", functii_definite[j].id, functii_definite[j].linie);
+                }
+            }
+        }
+    }
+}
+
+void print_functii_definite_si_arg()
+{
+    for (int i = 0; i < nr_curent_functii_definite; i++)
+    {
+        printf("%s\n", functii_definite[i].id);
+        for (int j = 0; j < functii_definite[i].nr_argumente; j++)
+        {
+            printf("%s %s ", functii_definite[i].argumente_functie[j].tip, functii_definite[i].argumente_functie[j].id);
+        }
+        printf("\n");
+    }
+}
 void print_info()
 {
     afiseaza_variabilele_declarate();
     afiseaza_variabilele_din_main();
     print_functii();
-    print_functii_main();
+    //print_functii_main();
     print_functii_definite();
     print_variabile_din_functii_definite();
     symbol_table();
+}
+
+void check_errors()
+{
+    verifica_daca_functiile_apelate_sunt_declarate();
+    verifica_daca_variabilele_sunt_declarate();
+    verifica_daca_2_variabile_sunt_declarate_la_fel();
+    verifica_daca_2_functii_au_aceeasi_semnatura();
+    afiseaza_erori_luate_la_compilare();
+    verifica_daca_functiile_definite_au_fost_declarata();
 }

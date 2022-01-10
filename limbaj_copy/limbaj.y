@@ -141,8 +141,9 @@ lista_functii : functie
               ;
 functie : FUNCTION TIP ID '(' lista_param_functii_definite ')' bloc_functie
         {
-             add_functie_definite($2,$3,yylineno);
-             nr_curent_functii_definite++;
+                  add_functie_definite($2,$3,yylineno);
+                  nr_curent_functii_definite++;
+             
         }
         | %empty;
         ;

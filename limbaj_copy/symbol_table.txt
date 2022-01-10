@@ -1,11 +1,13 @@
-(i1, integer, global, )
-(i1, integer, global, )
+(x, integer, global, 188)
+(x1, integer, global, )
+(x1, integer, global, )
+(x2, integer, global, 20)
+(f1, float, global, 43)
+(s, string, global, ana)
+(v, array, , )
+(g, struct, , )
 
-(e, integer, local, c)
-(e5, integer, local, c)
 
-(a integer, integer x2 integer x9)
-(b integer, integer a)
 
-(g struct, integer k integer u)
-(t struct, integer w)
+(g struct, integer x  integer z )
+(v array, integer, 0x55cd44dc7510)
