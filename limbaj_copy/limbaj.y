@@ -30,7 +30,7 @@ declaratii:  declaratie ';'
 	   | declaratii declaratie ';'
           ;
 
-declaratie :  STRUCT ID '{' declaratii_struct '}'    { nr_curent_structuri++; adauga_struct($2); }
+declaratie :  STRUCT ID '{' declaratii_struct '}'    { nr_curent_structuri++; adauga_struct($2,yylineno); }
            | TIP ID 
           {
                adauga_variabila("public",$1,$2,"",yylineno,"global");
@@ -41,14 +41,14 @@ declaratie :  STRUCT ID '{' declaratii_struct '}'    { nr_curent_structuri++; ad
            }
            
            | TIP ID '(' lista_param ')'
-           {
+           {   
                nr_curent_functii++;
                add_functie($1,$2,yylineno);
            }
            | TIP ID '(' ')' 
            | ARRAY LT TIP ',' INTEGER GT ID 
-           {
-                adauga_array($3,$5,$7);
+           {   nr_curent_arrays++;
+                adauga_array($3,$5,$7,yylineno);
            }
            ;
 declaratii_struct:  declaratie_struct ';'
@@ -63,7 +63,7 @@ declaratie_struct : TIP ID
            {
                 adauga_variabile_struct($2,$3,"",yylineno);
            }
-           | STRUCT ID '{' declaratii_struct '}' 
+           | STRUCT ID '{' declaratii_struct '}' { nr_curent_structuri++; adauga_struct($2,yylineno); }
            | TIP ID '(' lista_param ')' 
            {
                nr_curent_functii++;
@@ -71,6 +71,10 @@ declaratie_struct : TIP ID
            }
            | TIP ID '(' ')' 
            | ARRAY LT TIP ',' INTEGER GT ID 
+           {
+                nr_curent_arrays++;
+                adauga_array($3,$5,$7,yylineno);
+           }
            ;
 lista_param : param
             {
@@ -126,6 +130,7 @@ conditie : ID
          | conditie OR conditie
          | conditie AND conditie
          | '(' conditie ')'
+         | expresie
          ;
 
 bloc_main : MAIN '{' lista_instructiuni_main '}'  
@@ -191,7 +196,7 @@ statement: ID ASSIGN ID
               }
          }
          | ID ASSIGN expresie
-         {
+         {     
               char buf[30];
               sprintf(buf,"%d",evalAST($3));
               update_valoare($1,buf);
@@ -236,20 +241,37 @@ statement: ID ASSIGN ID
          }
          | ID '.' ID ASSIGN ID '.' ID
          {    
-              adauga_variabile_main($1,yylineno);
-              if(strcmp(ia_tip_struct($1,$3),ia_tip_struct($5,$7)) == 0)
-                    update_valoare_struct($1,$3,$7);
-               else
-              {
-                   char buf[500];
-                   sprintf(buf,"\"%s\" nu are acelasi tip ca \"%s\" (linia %d)\n",$3,$7,yylineno);
-                   adauga_eroare(buf,yylineno);
-              }
+              if(vericica_daca_struct_este_declarat($1,$3))
+              {     if(vericica_daca_struct_este_declarat($5,$7))
+                   {
+                        if(strcmp(ia_tip_struct($1,$3),ia_tip_struct($5,$7)) == 0)
+                              update_valoare_struct($1,$3,$7);
+                         else
+                    {
+                         char buf[500];
+                         sprintf(buf,"\"%s\" nu are acelasi tip ca \"%s\" (linia %d)\n",$3,$7,yylineno);
+                         adauga_eroare(buf,yylineno);
+                    }
+                    
+                    }
+                    else
+                    {
+                         char buf[500];
+                         sprintf(buf,"\"%s.%s\" nu este declarat (linia %d)\n",$5,$7,yylineno);
+                         adauga_eroare(buf,yylineno);
+                    }
+                    
+               }
+              else
+                    {char buf[500];
+                   sprintf(buf,"\"%s.%s\" nu este declarat (linia %d)\n",$1,$3,yylineno);
+                   adauga_eroare(buf,yylineno);}
          }
          | ID '.' ID ASSIGN INTEGER
 
          {
-              adauga_variabile_main($1,yylineno);
+              if(vericica_daca_struct_este_declarat($1,$3))
+              {
               if(strcmp(ia_tip_struct($1,$3),"integer") == 0)
                     update_valoare_struct($1,$3,$5);
                else
@@ -258,11 +280,19 @@ statement: ID ASSIGN ID
                    sprintf(buf,"\"%s.%s\" nu are tipul integer (linia %d)\n",$1,$3,yylineno);
                    adauga_eroare(buf,yylineno);
               }
+              }
+              else 
+              {     
+                    char buf[500];
+                   sprintf(buf,"\"%s.%s\" nu este declarat (linia %d)\n",$1,$3,yylineno);
+                   adauga_eroare(buf,yylineno);
+              }
          }
          | ID '.' ID ASSIGN FLOAT
 
          {
-              adauga_variabile_main($1,yylineno);
+              if(vericica_daca_struct_este_declarat($1,$3))
+              {
               if(strcmp(ia_tip_struct($1,$3),"float") == 0)
                     update_valoare_struct($1,$3,$5);
                else
@@ -271,10 +301,18 @@ statement: ID ASSIGN ID
                    sprintf(buf,"\"%s.%s\" nu are tipul float (linia %d)\n",$1,$3,yylineno);
                    adauga_eroare(buf,yylineno);
               }
+              }
+              else 
+              {     
+                    char buf[500];
+                   sprintf(buf,"\"%s.%s\" nu este declarat (linia %d)\n",$1,$3,yylineno);
+                   adauga_eroare(buf,yylineno);
+              }
          }
          | ID '.' ID ASSIGN BOOLEAN
          {
-               adauga_variabile_main($1,yylineno);
+              if(vericica_daca_struct_este_declarat($1,$3))
+              {
               if(strcmp(ia_tip_struct($1,$3),"boolean") == 0)
                     update_valoare_struct($1,$3,$5);
                else
@@ -282,12 +320,20 @@ statement: ID ASSIGN ID
                    char buf[500];
                    sprintf(buf,"\"%s.%s\" nu are tipul boolean (linia %d)\n",$1,$3,yylineno);
                    adauga_eroare(buf,yylineno);
-              }   
+              }
+              }
+              else 
+              {     
+                    char buf[500];
+                   sprintf(buf,"\"%s.%s\" nu este declarat (linia %d)\n",$1,$3,yylineno);
+                   adauga_eroare(buf,yylineno);
+              }
          }
          | ID '.' ID ASSIGN '"' STRING '"'
          {
-              adauga_variabile_main($1,yylineno);
-              if(strcmp(ia_tip_struct($1,$3),"string") == 0)
+              if(vericica_daca_struct_este_declarat($1,$3))
+              {
+              if(strcmp(ia_tip_struct($1,$3),"boolean") == 0)
                     update_valoare_struct($1,$3,$6);
                else
               {
@@ -295,19 +341,166 @@ statement: ID ASSIGN ID
                    sprintf(buf,"\"%s.%s\" nu are tipul string (linia %d)\n",$1,$3,yylineno);
                    adauga_eroare(buf,yylineno);
               }
+              }
+              else 
+              {     
+                    char buf[500];
+                   sprintf(buf,"\"%s.%s\" nu este declarat (linia %d)\n",$1,$3,yylineno);
+                   adauga_eroare(buf,yylineno);
+              }
          }
          | ID '.' ID ASSIGN expresie
-         {
-              char buf[30];
-              sprintf(buf,"%d",evalAST($5));
-              update_valoare_struct($1,$3,buf);
+         {     if(vericica_daca_struct_este_declarat($1,$3))
+              {
+              if(strcmp(ia_tip_struct($1,$3),"integer") == 0)
+                         {char buf[30];
+               sprintf(buf,"%d",evalAST($5));
+               update_valoare_struct($1,$3,buf);}
+               else
+              {
+                   char buf[500];
+                   sprintf(buf,"\"%s.%s\" nu are tipul integer (linia %d)\n",$1,$3,yylineno);
+                   adauga_eroare(buf,yylineno);
+              }
+              }
+              else 
+              {     
+                    char buf[500];
+                   sprintf(buf,"\"%s.%s\" nu este declarat (linia %d)\n",$1,$3,yylineno);
+                   adauga_eroare(buf,yylineno);
+              }
+
+              
          }
          | ID '[' INTEGER ']' ASSIGN ID '[' INTEGER ']'
+
+         {    
+              if(vericica_daca_array_este_declarat($1))
+                    {if(vericica_daca_array_este_declarat($6))
+                         {
+                         if(strcmp(ia_tip_array($1),ia_tip_array($6))==0)
+                              update_element_array_index($1,$3,$6,$8);
+                         else
+                              {
+                                   char buf[500];
+                                   sprintf(buf,"\"%s\" nu are acelasis tip ca \"%s\" (linia %d)\n",$1,$6,yylineno);
+                                   adauga_eroare(buf,yylineno);
+                              }
+                         }
+                    else
+                         {
+                         char buf[500];
+                         sprintf(buf,"\"%s\" nu este declarat (linia %d)\n",$6,yylineno);
+                         adauga_eroare(buf,yylineno);
+                         }
+                    }
+                    else 
+                    {
+                         char buf[500];
+                         sprintf(buf,"\"%s\" nu este declarat (linia %d)\n",$1,yylineno);
+                         adauga_eroare(buf,yylineno);
+                    }
+ 
+         }
          | ID '[' INTEGER ']' ASSIGN INTEGER
+          {    if(vericica_daca_array_este_declarat($1))    
+                         if(strcmp(ia_tip_array($1),"integer")==0)
+                              update_element_array_value($1,$3,$6);
+                         else
+                         {
+                              char buf[500];
+                              sprintf(buf,"\"%s\" nu are tipul integer (linia %d)\n",$1,yylineno);
+                              adauga_eroare(buf,yylineno);
+                         }
+                    
+               else 
+                    {
+                         char buf[500];
+                         sprintf(buf,"\"%s\" nu este declarat (linia %d)\n",$1,yylineno);
+                         adauga_eroare(buf,yylineno);
+                    }
+
+          }
          | ID '[' INTEGER ']' ASSIGN '"' STRING '"'
+         {    if(vericica_daca_array_este_declarat($1))    
+                         if(strcmp(ia_tip_array($1),"string")==0)
+                              update_element_array_value($1,$3,$7);
+                         else
+                         {
+                              char buf[500];
+                              sprintf(buf,"\"%s\" nu are tipul string (linia %d)\n",$1,yylineno);
+                              adauga_eroare(buf,yylineno);
+                         }
+                    
+               else 
+                    {
+                         char buf[500];
+                         sprintf(buf,"\"%s\" nu este declarat (linia %d)\n",$1,yylineno);
+                         adauga_eroare(buf,yylineno);
+                    }
+
+          }
          | ID '[' INTEGER ']' ASSIGN FLOAT
+         {    if(vericica_daca_array_este_declarat($1))    
+                         if(strcmp(ia_tip_array($1),"float")==0)
+                              update_element_array_value($1,$3,$6);
+                         else
+                         {
+                              char buf[500];
+                              sprintf(buf,"\"%s\" nu are tipul float (linia %d)\n",$1,yylineno);
+                              adauga_eroare(buf,yylineno);
+                         }
+                    
+               else 
+                    {
+                         char buf[500];
+                         sprintf(buf,"\"%s\" nu este declarat (linia %d)\n",$1,yylineno);
+                         adauga_eroare(buf,yylineno);
+                    }
+
+          }
          | ID '[' INTEGER ']' ASSIGN BOOLEAN
+         {    if(vericica_daca_array_este_declarat($1))    
+                         if(strcmp(ia_tip_array($1),"boolean")==0)
+                              update_element_array_value($1,$3,$6);
+                         else
+                         {
+                              char buf[500];
+                              sprintf(buf,"\"%s\" nu are tipul boolean (linia %d)\n",$1,yylineno);
+                              adauga_eroare(buf,yylineno);
+                         }
+                    
+               else 
+                    {
+                         char buf[500];
+                         sprintf(buf,"\"%s\" nu este declarat (linia %d)\n",$1,yylineno);
+                         adauga_eroare(buf,yylineno);
+                    }
+
+          }
          | ID '[' INTEGER ']' ASSIGN expresie
+         {     if(vericica_daca_array_este_declarat($1))
+              {
+              if(strcmp(ia_tip_array($1),"integer") == 0)
+                         {char buf[30];
+                         sprintf(buf,"%d",evalAST($6));
+                         update_element_array_value($1,$3,buf);}
+               else
+              {
+                   char buf[500];
+                   sprintf(buf,"\"%s\" nu are tipul integer (linia %d)\n",$1,yylineno);
+                   adauga_eroare(buf,yylineno);
+              }
+              }
+              else 
+              {     
+                    char buf[500];
+                   sprintf(buf,"\"%s.%s\" nu este declarat (linia %d)\n",$1,$3,yylineno);
+                   adauga_eroare(buf,yylineno);
+              }
+
+              
+         }
          | ID '(' lista_apel ')'
          {
               nr_curent_functii_main++;
@@ -376,6 +569,19 @@ expresie : '(' expresie ')' '^' expresie
                char* s = (char*)malloc(sizeof(char)*(10));
                sprintf(s,"%s",$1);
                $$=buildAST(s,NULL,NULL,numar);
+         }
+         | ID '[' INTEGER ']'
+         {
+               char* s = (char*)malloc(sizeof(char)*(10));
+               sprintf(s,"%s",get_value_array($1,$3));
+               $$=buildAST(s,NULL,NULL,numar);
+         }
+         | ID '(' lista_apel ')'
+         {     
+               char* s = (char*)malloc(sizeof(char)*(10));
+               sprintf(s,"%s","0");
+               $$=buildAST(s,NULL,NULL,numar);
+              
          }
          ;
 
