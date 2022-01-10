@@ -226,18 +226,18 @@ void verifica_daca_2_functii_au_aceeasi_semnatura()
         for (int j = 0; j < nr_curent_functii; j++)
         {
             if (i != j)
-            {
+            {   
                 //printf("%s %s %s %s\n",functii[i].tip,functii[j].tip,functii[i].id,functii[j].id);
                 if (strcmp(functii[i].tip, functii[j].tip) == 0 && strcmp(functii[i].id, functii[j].id) == 0 && i > j)
-                {
+                {   
                     int diferit = 0;
                     //printf("%d %d\n",functii[i].nr_argumente,functii[j].nr_argumente);
                     int maxim = functii[i].nr_argumente > functii[j].nr_argumente ? functii[i].nr_argumente : functii[j].nr_argumente;
                     for (int k = 0; k < maxim; k++)
-                    {
+                    {   
                         //printf("%s %s %d\n",functii[i].argumente_functie[k].tip,functii[j].argumente_functie[k].tip,maxim);
                         if (strcmp(functii[i].argumente_functie[k].tip, functii[j].argumente_functie[k].tip))
-                            diferit = 1;
+                            {diferit = 1;
                     }
                     if (!diferit)
                     {
@@ -252,6 +252,7 @@ void verifica_daca_2_functii_au_aceeasi_semnatura()
     {
         printf("%s", error_list[i]);
     }
+    }
 }
 void verifica_daca_2_variabile_sunt_declarate_la_fel()
 {
@@ -265,8 +266,8 @@ void verifica_daca_2_variabile_sunt_declarate_la_fel()
         for (int j = 0; j < nr_curent_var; j++)
         {
             if (i != j)
-            {
-                if (strcmp(variabile[i].id, variabile[j].id) == 0 && strcmp(variabile[i].tip, variabile[j].tip) == 0 && i < j)
+            {   
+                if (strcmp(variabile[i].id, variabile[j].id) == 0 && strcmp(variabile[i].tip, variabile[j].tip) == 0 && i > j)
                 {
                     sprintf(mesaj, "Redeclarare variabilei \"%s\" (linia %d)\n", variabile[i].id, variabile[i].linie);
                     strcpy(error_list[error_list_nr++], mesaj);
@@ -299,9 +300,13 @@ void adauga_variabile_struct(char *tip, char *id, char *valoare, int linie)
     structuri[nr_curent_structuri].nr_variabile_declarate_struct++;
 }
 
-void adauga_struct(char *id)
-{
+void adauga_struct(char *id, int linie)
+{   
     strcpy(structuri[nr_curent_structuri - 1].id, id);
+    strcpy(variabile[nr_curent_var].id,id);
+    strcpy(variabile[nr_curent_var].tip,"struct");
+    variabile[nr_curent_var].linie = linie;
+    nr_curent_var++;
 }
 
 void adauga_variabile_main(char *id, int linie)
@@ -368,6 +373,24 @@ void verifica_daca_variabilele_sunt_declarate()
     }
 }
 
+int vericica_daca_struct_este_declarat(char*id_struct,char*id_var)
+{   for(int i=0;i<nr_curent_structuri;i++)
+        if(strcmp(structuri[i].id,id_struct)==0)
+            for(int j=0;j<structuri[i].nr_variabile_declarate_struct;j++)
+                if(strcmp(structuri[i].variabile_declarate_in_struct[j].id,id_var)==0)
+                    return 1;
+    return 0;
+}
+
+int vericica_daca_array_este_declarat(char*id_array)
+{
+    for(int i=0; i<nr_curent_arrays;i++)
+        if(strcmp(arrays[i].id,id_array)==0)
+            return 1;
+    return 0;
+
+}
+
 char *ia_tip(char *id)
 {
     for (int i = 0; i < nr_curent_var; i++)
@@ -389,7 +412,20 @@ char *ia_tip_struct(char *id_struct, char* id_var)
                         {
                             return structuri[i].variabile_declarate_in_struct[j].tip;
                         }
+
+                
+        }
+    return "";
 }
+
+char *ia_tip_array(char*id_array)
+{   
+    for(int i=0; i<nr_curent_arrays; i++)
+        {
+            if(strcmp(arrays[i].id, id_array)==0)
+                return arrays[i].tip;
+        }
+        return "";
 }
 void print_functii()
 {
@@ -495,7 +531,9 @@ void check_errors()
 void symbol_table()
 {
     FILE *file;
+    FILE *file2;
     file = fopen("symbol_table.txt", "w+");
+    file2 = fopen("symbol_table_f.txt","w+");
     for (int i = 0; i < nr_curent_var; i++)
         fprintf(file, globalvariable_format, variabile[i].id, variabile[i].tip, variabile[i].localglobal, variabile[i].valoare);
     fprintf(file, "\n");
@@ -509,13 +547,13 @@ void symbol_table()
     fprintf(file, "\n");
     for (int i = 0; i < nr_curent_functii; i++)
     {
-        fprintf(file, "(%s %s,", functii[i].id, functii[i].tip);
+        fprintf(file2, "(%s %s,", functii[i].id, functii[i].tip);
         for (int j = 0; j < functii[i].nr_argumente; j++)
         {
-            fprintf(file, " %s %s", functii[i].argumente_functie[j].tip, functii[i].argumente_functie[j].id);
+            fprintf(file2, " %s %s", functii[i].argumente_functie[j].tip, functii[i].argumente_functie[j].id);
         }
-        fprintf(file, ")");
-        fprintf(file, "\n");
+        fprintf(file2, ")");
+        fprintf(file2, "\n");
     }
     fprintf(file, "\n");
 
@@ -538,26 +576,48 @@ void symbol_table()
 
 }
 
-void adauga_array(char *tip,char*dimensiune, char*id)
-{   strcpy(arrays[nr_curent_arrays].tip,tip);
-    strcpy(arrays[nr_curent_arrays].id,id);
-    strcpy(arrays[nr_curent_arrays].dimensiune,dimensiune);
+void adauga_array(char *tip,char*dimensiune, char*id,int linie)
+{   
+    strcpy(arrays[nr_curent_arrays-1].tip,tip);
+    strcpy(arrays[nr_curent_arrays-1].id,id);
+    strcpy(arrays[nr_curent_arrays-1].dimensiune,dimensiune);
     if(strcmp(tip,"integer")==0)
-        arrays[nr_curent_arrays].elemente = (struct variabila*)malloc(sizeof(int)*atoi(dimensiune));
+        arrays[nr_curent_arrays-1].elemente = (struct variabila*)malloc(sizeof(int)*atoi(dimensiune));
     if(strcmp(tip,"string")==0)
-        arrays[nr_curent_arrays].elemente = (struct variabila*)malloc(sizeof(char)*atoi(dimensiune));
+        arrays[nr_curent_arrays-1].elemente = (struct variabila*)malloc(sizeof(char)*atoi(dimensiune));
     if(strcmp(tip,"boolean")==0)
-        arrays[nr_curent_arrays].elemente = (struct variabila*)malloc(sizeof(bool)*atoi(dimensiune));
+        arrays[nr_curent_arrays-1].elemente = (struct variabila*)malloc(sizeof(bool)*atoi(dimensiune));
     if(strcmp(tip,"float")==0)
-        arrays[nr_curent_arrays].elemente = (struct variabila*)malloc(sizeof(float)*atoi(dimensiune));
-    printf("%p",arrays[nr_curent_arrays].elemente);
-    nr_curent_arrays++;
+        arrays[nr_curent_arrays-1].elemente = (struct variabila*)malloc(sizeof(float)*atoi(dimensiune));
+    strcpy(variabile[nr_curent_var].id,id);
+    strcpy(variabile[nr_curent_var].tip,"array");
+    variabile[nr_curent_var].linie = linie; 
+    nr_curent_var++;
+    
 }
 
-void update_element_array(char *id_array, char *tip, char *valoare)
-{
-    exit(0);
+void update_element_array_index(char *id_array1, char *index_element1, char *id_array2,char *index_element2)
+{   
+    for(int i=0;i<nr_curent_arrays;i++)
+        {
+            if(strcmp(arrays[i].id, id_array1)==0)
+                for(int j=0;j<nr_curent_arrays;j++)
+                    if(strcmp(arrays[j].id, id_array2)==0)
+                        strcpy(arrays[i].elemente[atoi(index_element1)].valoare, arrays[j].elemente[atoi(index_element2)].valoare);           
+        }
 }
+void update_element_array_value(char *id_array1, char *index_element1, char *value)
+{   
+    for(int i=0;i<nr_curent_arrays;i++)
+        {
+            if(strcmp(arrays[i].id, id_array1)==0)
+                {
+                    strcpy(arrays[i].elemente[atoi(index_element1)].valoare,value);    
+                }
+        }
+}
+
+
 
 void update_valoare(char* id,char* valoare)
 {
@@ -606,6 +666,16 @@ char* get_value_struct(char* id_struct, char* id_var)
                     if(strcmp(structuri[i].variabile_declarate_in_struct[j].id,id_var)==0)
                         return structuri[i].variabile_declarate_in_struct[j].valoare;
 
+        }
+}
+char* get_value_array(char* id_array, char* index)
+{
+    for(int i=0;i<nr_curent_arrays;i++)
+        {
+            if(strcmp(arrays[i].id,id_array)==0)
+                {
+                    return arrays[i].elemente[atoi(index)].valoare;
+                }
         }
 }
 
