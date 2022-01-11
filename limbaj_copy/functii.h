@@ -30,6 +30,7 @@ struct structura
     char id[30];
     struct variabila variabile_declarate_in_struct[100];
     int nr_variabile_declarate_struct;
+    char localglobal[30];
 };
 struct array
 {
@@ -38,6 +39,7 @@ struct array
     char dimensiune[30];
     struct variabila *elemente;
     int nr_curent_elemente_array;
+    char localglobal[30];
 };
 struct element_array
 {
@@ -294,6 +296,16 @@ void adauga_variabila(char *identifier, char *tip, char *id, char *valoare, int 
     variabile[nr_curent_var].linie = linie;
     nr_curent_var++;
 }
+void adauga_variabila_const(char*tip,char *id, char *valoare, int linie, char *localglobal)
+{
+    strcpy(variabile[nr_curent_var].id, id);
+    strcpy(variabile[nr_curent_var].valoare, valoare);
+    strcpy(variabile[nr_curent_var].tip, tip);
+    strcpy(variabile[nr_curent_var].localglobal, localglobal);
+    variabile[nr_curent_var].linie = linie;
+    nr_curent_var++;
+}
+
 void adauga_variabile_struct(char *tip, char *id, char *valoare, int linie)
 {
     strcpy(structuri[nr_curent_structuri].variabile_declarate_in_struct[structuri[nr_curent_structuri].nr_variabile_declarate_struct].valoare, valoare);
@@ -302,11 +314,12 @@ void adauga_variabile_struct(char *tip, char *id, char *valoare, int linie)
     structuri[nr_curent_structuri].nr_variabile_declarate_struct++;
 }
 
-void adauga_struct(char *id, int linie)
+void adauga_struct(char *localglobal,char *id, int linie)
 {
     strcpy(structuri[nr_curent_structuri - 1].id, id);
     strcpy(variabile[nr_curent_var].id, id);
     strcpy(variabile[nr_curent_var].tip, "struct");
+    strcpy(structuri[nr_curent_structuri-1].localglobal, localglobal);
     variabile[nr_curent_var].linie = linie;
     nr_curent_var++;
 }
@@ -375,7 +388,7 @@ void verifica_daca_variabilele_sunt_declarate()
     }
 }
 
-int vericica_daca_struct_este_declarat(char *id_struct, char *id_var)
+int verifica_daca_struct_este_declarat(char *id_struct, char *id_var)
 {
     for (int i = 0; i < nr_curent_structuri; i++)
         if (strcmp(structuri[i].id, id_struct) == 0)
@@ -385,7 +398,7 @@ int vericica_daca_struct_este_declarat(char *id_struct, char *id_var)
     return 0;
 }
 
-int vericica_daca_array_este_declarat(char *id_array)
+int verifica_daca_array_este_declarat(char *id_array)
 {
     for (int i = 0; i < nr_curent_arrays; i++)
         if (strcmp(arrays[i].id, id_array) == 0)
@@ -555,7 +568,8 @@ void symbol_table()
     for (int i = 0; i < nr_curent_structuri; i++)
     {
         fprintf(file, "(");
-        fprintf(file, "%s struct,", structuri[i].id);
+        fprintf(file, "%s struct %s,", structuri[i].id, structuri[i].localglobal);
+        
         for (int j = 0; j < structuri[i].nr_variabile_declarate_struct; j++)
             fprintf(file, " %s %s %s", structuri[i].variabile_declarate_in_struct[j].tip, structuri[i].variabile_declarate_in_struct[j].id, structuri[i].variabile_declarate_in_struct[j].valoare);
         fprintf(file, ")");
@@ -564,15 +578,16 @@ void symbol_table()
 
     for (int i = 0; i < nr_curent_arrays; i++)
     {
-        fprintf(file, "(%s array, %s, %p)\n", arrays[i].id, arrays[i].tip, arrays[i].elemente);
+        fprintf(file, "(%s array %s, %s, %p)\n", arrays[i].id, arrays[i].localglobal,arrays[i].tip, arrays[i].elemente);
     }
 }
 
-void adauga_array(char *tip, char *dimensiune, char *id, int linie)
+void adauga_array(char*localglobal, char *tip, char *dimensiune, char *id, int linie)
 {
     strcpy(arrays[nr_curent_arrays - 1].tip, tip);
     strcpy(arrays[nr_curent_arrays - 1].id, id);
     strcpy(arrays[nr_curent_arrays - 1].dimensiune, dimensiune);
+    strcpy(arrays[nr_curent_arrays - 1].localglobal, localglobal);
     if (strcmp(tip, "integer") == 0)
         arrays[nr_curent_arrays - 1].elemente = (struct variabila *)malloc(sizeof(int) * atoi(dimensiune));
     if (strcmp(tip, "string") == 0)
