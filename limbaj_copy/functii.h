@@ -258,6 +258,7 @@ void verifica_daca_2_functii_au_aceeasi_semnatura()
         }
     }
 }
+
 void verifica_daca_2_variabile_sunt_declarate_la_fel()
 {
     int gasit = 0;
@@ -758,6 +759,19 @@ void print_functii_definite_si_arg()
         printf("\n");
     }
 }
+
+int exista_var(char* tip, char* id)
+{
+    for(int i=0;i<nr_curent_var;i++)
+    {
+        if(strcmp(variabile[i].tip,tip) == 0 && strcmp(variabile[i].id,id) == 0)
+        {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 void print_info()
 {
     afiseaza_variabilele_declarate();

@@ -1,4 +1,3 @@
 (t1 integer, integer x float z)
 (t1 integer, integer x float z)
 (t1 integer, float x float z)
-(t2 integer, integer p)

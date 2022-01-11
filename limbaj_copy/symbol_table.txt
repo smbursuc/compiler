@@ -1,13 +1,15 @@
-(x, integer, global, 188)
-(x1, integer, global, )
+(x, integer, global, 142)
 (x1, integer, global, )
 (x2, integer, global, 20)
-(f1, float, global, 43)
-(s, string, global, ana)
+(f1, float, global, 20)
+(s, string, global, andrei)
+(x5, integer, global, 10)
 (v, array, , )
+(g, array, , )
 (g, struct, , )
 
 
 
-(g struct, integer x  integer z )
-(v array, integer, 0x55cd44dc7510)
+(g struct global, integer x  integer z )
+(v array global, integer, 0x55dc8496f920)
+(g array global, string, 0x55dc8496fde0)

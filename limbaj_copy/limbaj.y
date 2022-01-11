@@ -24,7 +24,7 @@ struct nod* root;
 %type <root>expresie
 %type <strval>bool 
 %%
-progr: declaratii bloc_main lista_functii {printf("\nprogram corect sintactic\n"); print_info(); check_errors();}
+progr: declaratii bloc_main lista_functii {print_info(); check_errors(); printf("\nprogram corect sintactic\n");}
      ;
 
 declaratii:  declaratie ';'
@@ -34,7 +34,9 @@ declaratii:  declaratie ';'
 declaratie :  STRUCT ID '{' declaratii_struct '}'    { nr_curent_structuri++; adauga_struct("global",$2,yylineno); }
            | TIP ID 
           {     
+               if(!exista_var($1,$2))
                adauga_variabila("public",$1,$2,"",yylineno,"global");
+               else printf("Redeclararea variabilei \"%s\" (linia %d)\n",$2,yylineno);
           }
            | CONST TIP ID ASSIGN INTEGER
            {    
@@ -229,7 +231,7 @@ bool : bool '&' bool
             strcpy($$,s);
         } 
     }
-    | STRING
+    | BOOLEAN
     {
         char *s = strdup($1);
             strcpy($$,s);;
@@ -638,6 +640,10 @@ statement: ID ASSIGN ID
          | PRINT '(' expresie ')'
          {
               printf("%d\n",evalAST($3));
+         }
+         | PRINT '(' bool ')' 
+         {
+              printf("%s\n",$3);
          }
          ;
 expresie : '(' expresie ')' '^' expresie
