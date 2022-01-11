@@ -4,11 +4,12 @@ integer x1;
 integer x2;
 float f1;
 string s;
+const integer x5 <- 10;
 integer t1(integer x, float z);
 integer t1(integer x, float z);
 integer t1(float x, float z);
-integer t2(integer p);
 array<integer,300> v;
+array<string,50> g;
 structure g {integer x; integer z;};
 main
 {  
@@ -19,9 +20,38 @@ main
     x3 <- x + 2;
     f1 <- x + x2;
     x <- s + f1 +2 + f1 + 100 + t2(3);
-    t2(100);
-}
-function integer t2(integer s,float x)
-{
-    i <- 90;
+    print(2+3);
+    t2(x);
+    if (x>x2)
+    {
+        s <- "andrei";
+    }
+}integer x;
+integer x1;
+integer x1;
+integer x2;
+float f1;
+string s;
+const integer x5 <- 10;
+integer t1(integer x, float z);
+integer t1(integer x, float z);
+integer t1(float x, float z);
+array<integer,300> v;
+array<string,50> g;
+structure g {integer x; integer z;};
+main
+{  
+    x <- 23;
+    f1 <- 50;
+    x2 <- 20;
+    s <- "ana";
+    x3 <- x + 2;
+    f1 <- x + x2;
+    x <- s + f1 +2 + f1 + 100 + t2(3);
+    print(2+3);
+    t2(x);
+    if (x>x2)
+    {
+        s <- "andrei";
+    }
 }
