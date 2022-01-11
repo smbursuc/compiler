@@ -22,6 +22,7 @@ struct nod* root;
 %left MULT SUBT
 %start progr
 %type <root>expresie
+%type <strval>bool 
 %%
 progr: declaratii bloc_main lista_functii {printf("\nprogram corect sintactic\n"); print_info(); check_errors();}
      ;
@@ -30,14 +31,53 @@ declaratii:  declaratie ';'
 	   | declaratii declaratie ';'
           ;
 
-declaratie :  STRUCT ID '{' declaratii_struct '}'    { nr_curent_structuri++; adauga_struct($2,yylineno); }
+declaratie :  STRUCT ID '{' declaratii_struct '}'    { nr_curent_structuri++; adauga_struct("global",$2,yylineno); }
            | TIP ID 
-          {
+          {     
                adauga_variabila("public",$1,$2,"",yylineno,"global");
           }
-           | CONST TIP ID 
-           {
-                adauga_variabila("const",$2,$3,"",yylineno, "global");
+           | CONST TIP ID ASSIGN INTEGER
+           {    
+                if(strcmp($2,"integer") == 0)
+                    adauga_variabila_const("integer",$3,$5,yylineno,"global");
+               else
+              {
+                   char buf[500];
+                   sprintf(buf,"\"%s\" nu are tipul integer (linia %d)\n",$3,yylineno);
+                   adauga_eroare(buf,yylineno);
+              }
+           }
+           | CONST TIP ID ASSIGN FLOAT
+           {     if(strcmp($2,"float") == 0)
+                    adauga_variabila_const("float",$3,$5,yylineno,"global");
+               else
+              {
+                   char buf[500];
+                   sprintf(buf,"\"%s\" nu are tipul float (linia %d)\n",$3,yylineno);
+                   adauga_eroare(buf,yylineno);
+              }
+           }
+           | CONST TIP ID ASSIGN STRING
+           {    
+                if(strcmp($2,"string") == 0)
+                    adauga_variabila_const("string",$3,$5,yylineno,"global");
+               else
+              {
+                   char buf[500];
+                   sprintf(buf,"\"%s\" nu are tipul string (linia %d)\n",$3,yylineno);
+                   adauga_eroare(buf,yylineno);
+              }
+           }
+           | CONST TIP ID ASSIGN BOOLEAN
+           {    
+                if(strcmp($2,"boolean") == 0)
+                    adauga_variabila_const("boolean",$3,$5,yylineno,"global");
+               else
+              {
+                   char buf[500];
+                   sprintf(buf,"\"%s\" nu are tipul boolean (linia %d)\n",$3,yylineno);
+                   adauga_eroare(buf,yylineno);
+              }
            }
            
            | TIP ID '(' lista_param ')'
@@ -46,9 +86,13 @@ declaratie :  STRUCT ID '{' declaratii_struct '}'    { nr_curent_structuri++; ad
                add_functie($1,$2,yylineno);
            }
            | TIP ID '(' ')' 
+           {   
+               nr_curent_functii++;
+               add_functie($1,$2,yylineno);
+           }
            | ARRAY LT TIP ',' INTEGER GT ID 
            {   nr_curent_arrays++;
-                adauga_array($3,$5,$7,yylineno);
+                adauga_array("global",$3,$5,$7,yylineno);
            }
            ;
 declaratii_struct:  declaratie_struct ';'
@@ -63,7 +107,7 @@ declaratie_struct : TIP ID
            {
                 adauga_variabile_struct($2,$3,"",yylineno);
            }
-           | STRUCT ID '{' declaratii_struct '}' { nr_curent_structuri++; adauga_struct($2,yylineno); }
+           | STRUCT ID '{' declaratii_struct '}' { nr_curent_structuri++; adauga_struct("global",$2,yylineno); }
            | TIP ID '(' lista_param ')' 
            {
                nr_curent_functii++;
@@ -73,7 +117,7 @@ declaratie_struct : TIP ID
            | ARRAY LT TIP ',' INTEGER GT ID 
            {
                 nr_curent_arrays++;
-                adauga_array($3,$5,$7,yylineno);
+                adauga_array("global",$3,$5,$7,yylineno);
            }
            ;
 lista_param : param
@@ -131,8 +175,92 @@ conditie : ID
          | conditie AND conditie
          | '(' conditie ')'
          | expresie
+         | bool
          ;
 
+bool : bool '&' bool
+    {
+        if(strcmp($1,"false")==0 || strcmp($3,"false") == 0)
+        {
+            char x[30];
+            strcpy(x,"false");
+            char *s = strdup(x);
+            strcpy($$,s);
+        }
+        else
+        {
+            char x[30];
+            strcpy(x,"true");
+            char *s = strdup(x);
+            strcpy($$,s);
+        } 
+    }
+    | bool '|' bool
+    {
+        if(strcmp($1,"true")==0 || strcmp($3,"true") == 0)
+        {
+            char x[30];
+            strcpy(x,"true");
+            char *s = strdup(x);
+            strcpy($$,s);
+        }
+        else
+        {
+            char x[30];
+            strcpy(x,"false");
+            char *s = strdup(x);
+            strcpy($$,s);
+        } 
+    }
+    | '!' bool 
+    {
+        if(strcmp($2,"false")==0)
+        {
+            char x[30];
+            strcpy(x,"true");
+            char *s = strdup(x);
+            strcpy($$,s);
+        }
+        else
+        {
+            char x[30];
+            strcpy(x,"false");
+            char *s = strdup(x);
+            strcpy($$,s);
+        } 
+    }
+    | STRING
+    {
+        char *s = strdup($1);
+            strcpy($$,s);;
+    }
+    | ID
+    {
+        if(strcmp(ia_tip($1),"integer") == 0)
+        {
+            if(get_value($1)==0)
+            {
+                char x[30];
+                strcpy(x,"false");
+                char *s = strdup(x);
+                strcpy($$,s);
+            }
+            else
+            {
+                char x[30];
+                strcpy(x,"true");
+                char *s = strdup(x);
+                strcpy($$,s);
+            }
+        }
+        else
+            {
+                char x[30];
+                strcpy(x,"true");
+                char *s = strdup(x);
+                strcpy($$,s);
+            }
+    }
 bloc_main : MAIN '{' lista_instructiuni_main '}'  
      ;
 
@@ -242,8 +370,8 @@ statement: ID ASSIGN ID
          }
          | ID '.' ID ASSIGN ID '.' ID
          {    
-              if(vericica_daca_struct_este_declarat($1,$3))
-              {     if(vericica_daca_struct_este_declarat($5,$7))
+              if(verifica_daca_struct_este_declarat($1,$3))
+              {     if(verifica_daca_struct_este_declarat($5,$7))
                    {
                         if(strcmp(ia_tip_struct($1,$3),ia_tip_struct($5,$7)) == 0)
                               update_valoare_struct($1,$3,$7);
@@ -271,7 +399,7 @@ statement: ID ASSIGN ID
          | ID '.' ID ASSIGN INTEGER
 
          {
-              if(vericica_daca_struct_este_declarat($1,$3))
+              if(verifica_daca_struct_este_declarat($1,$3))
               {
               if(strcmp(ia_tip_struct($1,$3),"integer") == 0)
                     update_valoare_struct($1,$3,$5);
@@ -292,7 +420,7 @@ statement: ID ASSIGN ID
          | ID '.' ID ASSIGN FLOAT
 
          {
-              if(vericica_daca_struct_este_declarat($1,$3))
+              if(verifica_daca_struct_este_declarat($1,$3))
               {
               if(strcmp(ia_tip_struct($1,$3),"float") == 0)
                     update_valoare_struct($1,$3,$5);
@@ -312,7 +440,7 @@ statement: ID ASSIGN ID
          }
          | ID '.' ID ASSIGN BOOLEAN
          {
-              if(vericica_daca_struct_este_declarat($1,$3))
+              if(verifica_daca_struct_este_declarat($1,$3))
               {
               if(strcmp(ia_tip_struct($1,$3),"boolean") == 0)
                     update_valoare_struct($1,$3,$5);
@@ -332,7 +460,7 @@ statement: ID ASSIGN ID
          }
          | ID '.' ID ASSIGN '"' STRING '"'
          {
-              if(vericica_daca_struct_este_declarat($1,$3))
+              if(verifica_daca_struct_este_declarat($1,$3))
               {
               if(strcmp(ia_tip_struct($1,$3),"boolean") == 0)
                     update_valoare_struct($1,$3,$6);
@@ -351,7 +479,7 @@ statement: ID ASSIGN ID
               }
          }
          | ID '.' ID ASSIGN expresie
-         {     if(vericica_daca_struct_este_declarat($1,$3))
+         {     if(verifica_daca_struct_este_declarat($1,$3))
               {
               if(strcmp(ia_tip_struct($1,$3),"integer") == 0)
                          {char buf[30];
@@ -376,8 +504,8 @@ statement: ID ASSIGN ID
          | ID '[' INTEGER ']' ASSIGN ID '[' INTEGER ']'
 
          {    
-              if(vericica_daca_array_este_declarat($1))
-                    {if(vericica_daca_array_este_declarat($6))
+              if(verifica_daca_array_este_declarat($1))
+                    {if(verifica_daca_array_este_declarat($6))
                          {
                          if(strcmp(ia_tip_array($1),ia_tip_array($6))==0)
                               update_element_array_index($1,$3,$6,$8);
@@ -404,7 +532,7 @@ statement: ID ASSIGN ID
  
          }
          | ID '[' INTEGER ']' ASSIGN INTEGER
-          {    if(vericica_daca_array_este_declarat($1))    
+          {    if(verifica_daca_array_este_declarat($1))    
                          if(strcmp(ia_tip_array($1),"integer")==0)
                               update_element_array_value($1,$3,$6);
                          else
@@ -423,7 +551,7 @@ statement: ID ASSIGN ID
 
           }
          | ID '[' INTEGER ']' ASSIGN '"' STRING '"'
-         {    if(vericica_daca_array_este_declarat($1))    
+         {    if(verifica_daca_array_este_declarat($1))    
                          if(strcmp(ia_tip_array($1),"string")==0)
                               update_element_array_value($1,$3,$7);
                          else
@@ -442,7 +570,7 @@ statement: ID ASSIGN ID
 
           }
          | ID '[' INTEGER ']' ASSIGN FLOAT
-         {    if(vericica_daca_array_este_declarat($1))    
+         {    if(verifica_daca_array_este_declarat($1))    
                          if(strcmp(ia_tip_array($1),"float")==0)
                               update_element_array_value($1,$3,$6);
                          else
@@ -461,7 +589,7 @@ statement: ID ASSIGN ID
 
           }
          | ID '[' INTEGER ']' ASSIGN BOOLEAN
-         {    if(vericica_daca_array_este_declarat($1))    
+         {    if(verifica_daca_array_este_declarat($1))    
                          if(strcmp(ia_tip_array($1),"boolean")==0)
                               update_element_array_value($1,$3,$6);
                          else
@@ -480,7 +608,7 @@ statement: ID ASSIGN ID
 
           }
          | ID '[' INTEGER ']' ASSIGN expresie
-         {     if(vericica_daca_array_este_declarat($1))
+         {     if(verifica_daca_array_este_declarat($1))
               {
               if(strcmp(ia_tip_array($1),"integer") == 0)
                          {char buf[30];
@@ -606,6 +734,8 @@ tipuri : INTEGER
        {  
           add_functie_argumente_main("integer",$1);
           functii_in_main[nr_curent_functii_main].nr_argumente++;
+       }
+       | ID{
        }
        ;
 %%
